@@ -5,11 +5,23 @@ body {
     overflow: hidden;
 }
 
-button {
+.game,
+.game * {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
+}
+
+.game input,
+.game textarea,
+.game [contenteditable="true"] {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.game button {
     touch-action: manipulation;
 }
 
