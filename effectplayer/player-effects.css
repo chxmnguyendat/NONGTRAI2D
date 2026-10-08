@@ -1,0 +1,130 @@
+/* HIỆU ỨNG VÀO GAME: nhân vật rơi từ mép trên màn hình xuống vị trí xuất hiện. */
+.player.is-entering .player-sprite {
+    animation: player-entry-drop 3s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.player-sprite {
+    position: relative;
+    z-index: 2;
+}
+
+.landing-wind {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    bottom: 1px;
+    width: 90px;
+    height: 24px;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.wind-streak {
+    position: absolute;
+    display: block;
+    height: 3px;
+    background: #fff7d1;
+    box-shadow: 2px 2px 0 #9d8754;
+    opacity: 0;
+}
+
+.landing-wind.is-active .wind-streak-left {
+    top: 7px;
+    left: 31px;
+    width: 20px;
+    animation: landing-gust-left 650ms steps(5, end) both;
+}
+
+.landing-wind.is-active .wind-streak-right {
+    top: 11px;
+    left: 39px;
+    width: 24px;
+    animation: landing-gust-right 700ms steps(5, end) both;
+}
+
+.landing-wind.is-active .wind-streak-low-left {
+    top: 16px;
+    left: 34px;
+    width: 14px;
+    animation: landing-gust-left 550ms steps(4, end) 60ms both;
+}
+
+.landing-wind.is-active .wind-streak-low-right {
+    top: 4px;
+    left: 41px;
+    width: 12px;
+    animation: landing-gust-right 600ms steps(4, end) 40ms both;
+}
+
+@keyframes landing-gust-left {
+    0% { opacity: 0; transform: translateX(0) scaleX(.5); }
+    20% { opacity: .95; }
+    100% { opacity: 0; transform: translateX(-30px) scaleX(1.2); }
+}
+
+@keyframes landing-gust-right {
+    0% { opacity: 0; transform: translateX(0) scaleX(.5); }
+    20% { opacity: .95; }
+    100% { opacity: 0; transform: translateX(30px) scaleX(1.2); }
+}
+
+@keyframes player-entry-drop {
+    from {
+        transform: translateY(-100vh);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.entry-greeting:not([hidden]) {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    bottom: calc(100% + 17px);
+    display: grid;
+    width: max-content;
+    min-width: 61px;
+    max-width: min(210px, 70vw);
+    min-height: 47px;
+    height: auto;
+    box-sizing: border-box;
+    padding: 9px 15px;
+    place-items: center;
+    color: #171717;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+    overflow-wrap: anywhere;
+    transform: translateX(-50%);
+    image-rendering: pixelated;
+    isolation: isolate;
+    animation: greeting-popup 350ms ease-out both;
+}
+
+.entry-greeting::before,
+.entry-greeting::after {
+    position: absolute;
+    content: "";
+    inset: 0;
+    clip-path: polygon(28% 0, 70% 0, 70% 7%, 84% 7%, 84% 15%, 94% 15%, 94% 25%, 100% 25%, 100% 66%, 94% 66%, 94% 77%, 72% 77%, 72% 84%, 48% 84%, 48% 92%, 40% 92%, 40% 100%, 32% 100%, 32% 88%, 26% 88%, 26% 80%, 16% 80%, 16% 72%, 8% 72%, 8% 64%, 0 64%, 0 30%, 7% 30%, 7% 20%, 17% 20%, 17% 10%, 28% 10%);
+}
+
+.entry-greeting::before {
+    z-index: -2;
+    background: #171717;
+}
+
+.entry-greeting::after {
+    z-index: -1;
+    inset: 4px;
+    background: #fffef2;
+    box-shadow: inset 0 0 0 3px #e8d98a;
+}
+
+@keyframes greeting-popup {
+    from { opacity: 0; scale: 0.8; }
+    to { opacity: 1; scale: 1; }
+}

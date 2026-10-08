@@ -1,0 +1,526 @@
+body {
+    margin: 0;
+    background-color: #87ceeb;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.game {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    box-sizing: border-box;
+    background-color: #78b957;
+    border: 5px solid #4a3728;
+    position: relative;
+    overflow: hidden;
+}
+
+/* BẢN ĐỒ GAME: tăng width/height để mở rộng khu vực có thể khám phá. */
+.world {
+    /* MAP LEFT EXPANSION: thêm khoảng trống về phía trái và dời cảnh cũ theo cùng biến này. */
+    --map-left-expansion: 600px;
+    /* MAP TOP EXPANSION: thêm khoảng trống phía trên và dời cảnh cũ xuống theo biến này. */
+    --map-top-expansion: 500px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(2400px + var(--map-left-expansion));
+    height: calc(1600px + var(--map-top-expansion));
+    will-change: transform;
+}
+
+.player {
+    position: absolute;
+    z-index: 2;
+    transform: scale(1.5);
+    transform-origin: top left;
+}
+
+.player-sprite {
+    width: 50px;
+    height: 81.25px;
+    display: block;
+    background-image: url("../assets/player/player-walk-sprite-sheet-final.png");
+    background-size: 300px 325px;
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+.player-sprite.is-standing {
+    background-image: url("../assets/player/player-stand.png");
+    background-size: auto 81.25px;
+    background-position: center top;
+}
+
+.player-sprite.is-walking {
+    background-image: url("../assets/player/player-walk-sprite-sheet-final.png");
+    background-size: 300px 325px;
+    width: 50px;
+    height: 81.25px;
+}
+
+.player-sprite[data-gender="female"],
+.player-sprite[data-gender="female"].is-walking {
+    background-image: url("../assets/player/player-girl-walk-sprite-sheet.png");
+    background-size: 300px 325px;
+    background-repeat: no-repeat;
+}
+
+.player-sprite[data-gender="female"].is-standing {
+    background-image: url("../assets/player/player-girl.png");
+    background-size: auto 81.25px;
+    background-position: center top;
+}
+
+.controls {
+    position: absolute;
+    left: 140px;
+    bottom: 130px;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: repeat(3, 62px);
+    grid-template-rows: repeat(3, 62px);
+    gap: 0;
+    grid-template-areas:
+        ". up ."
+        "left center right"
+        ". down .";
+    touch-action: none;
+    user-select: none;
+    filter: drop-shadow(0 7px 7px #16341f66);
+    transform: scale(var(--controls-scale, 1));
+    transform-origin: bottom left;
+    transition: transform 120ms ease;
+}
+
+/* NÚT CHỌN MỤC TIÊU: nút cố định trên màn hình, chỉ bật khi ở gần vật thể. */
+.target-select-widget {
+    position: absolute;
+    right: 38px;
+    bottom: 120px;
+    z-index: 4;
+    width: 190px;
+}
+
+.target-select-button {
+    display: flex;
+    width: 100%;
+    min-height: 64px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 3px solid #73522f;
+    border-radius: 17px;
+    background: linear-gradient(145deg, #b9ec83, #68b84e);
+    color: #29451f;
+    font: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #486d35, 0 8px 12px #26351e44;
+    transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease;
+}
+
+.target-select-icon {
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.target-select-check {
+    color: #23843a;
+}
+
+.target-select-cancel {
+    color: #c83232;
+}
+
+.target-select-icon[hidden] {
+    display: none;
+}
+
+.target-select-button:hover:not(:disabled) {
+    filter: brightness(1.07);
+    transform: translateY(-2px);
+}
+
+.target-select-button:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #486d35;
+}
+
+.target-select-button:disabled {
+    border-color: #72654e;
+    background: linear-gradient(145deg, #d6d0be, #aaa28c);
+    color: #514b40;
+    cursor: default;
+    opacity: .76;
+    box-shadow: 0 4px 0 #716958;
+}
+
+.target-select-button[aria-pressed="true"] {
+    background: linear-gradient(145deg, #ffe88d, #e9aa43);
+    color: #49321d;
+}
+
+.settings-toggle {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 12;
+    width: 52px;
+    height: 52px;
+    border: 2px solid #725332;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #fff8e8, #e6c993);
+    color: #59432d;
+    font-size: 27px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #725332, 0 7px 12px #26351e44;
+}
+
+.settings-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 14;
+    width: min(280px, calc(100vw - 48px));
+    max-height: calc(100% - 40px);
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 16px;
+    border: 2px solid #725332;
+    border-radius: 16px;
+    background: #fff8e8f5;
+    color: #493724;
+    box-shadow: 0 8px 20px #26351e55;
+    transform: translate(-50%, -50%);
+}
+
+/* MENU TẠM DỪNG: phủ tối sân chơi phía sau bảng menu ở giữa màn hình. */
+.menu-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    border: 0;
+    background: #17251dcc;
+    cursor: pointer;
+}
+
+.menu-backdrop[hidden] {
+    display: none;
+}
+
+.game.is-paused * {
+    animation-play-state: paused !important;
+}
+
+/* TÙY BIẾN NÚT: nút mở chế độ sắp xếp và thanh hoàn tất khi kéo thả. */
+.customize-controls-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid #725332;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #fff8e8, #e6c993);
+    color: #493724;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.customize-controls-button:hover {
+    filter: brightness(1.04);
+}
+
+.customize-toolbar {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: calc(100% - 24px);
+    padding: 10px 12px 10px 16px;
+    border: 2px solid #725332;
+    border-radius: 14px;
+    background: #fff8e8f5;
+    color: #493724;
+    box-shadow: 0 5px 15px #26351e55;
+    font-size: 14px;
+    transform: translateX(-50%);
+}
+
+.customize-toolbar[hidden] {
+    display: none;
+}
+
+.customize-toolbar button {
+    padding: 8px 14px;
+    border: 1px solid #486d35;
+    border-radius: 9px;
+    background: #68b84e;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.game.is-customizing .controls,
+.game.is-customizing .target-select-widget {
+    z-index: 20;
+    cursor: grab;
+    touch-action: none;
+    outline: 2px dashed #fff8e8;
+    outline-offset: 4px;
+}
+
+.game.is-customizing .target-select-button {
+    pointer-events: none;
+}
+
+@media (max-width: 600px) {
+    .controls {
+        left: 12px;
+        bottom: 20px;
+        grid-template-columns: repeat(3, 48px);
+        grid-template-rows: repeat(3, 48px);
+        transform-origin: bottom left;
+    }
+
+    .control-center {
+        width: 48px;
+        height: 48px;
+    }
+
+    .target-select-widget {
+        right: 12px;
+        bottom: 24px;
+        width: 140px;
+    }
+
+    .target-select-button {
+        min-height: 56px;
+        gap: 6px;
+        padding: 7px;
+        font-size: 15px;
+    }
+
+}
+
+.settings-panel[hidden] {
+    display: none;
+}
+
+.menu-screen[hidden] {
+    display: none;
+}
+
+.settings-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.settings-panel h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.settings-close {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #b99b6b;
+    border-radius: 9px;
+    background: #fffdf6;
+    color: #59432d;
+    font-size: 23px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.settings-group {
+    padding: 12px;
+    border: 1px solid #dbc8a4;
+    border-radius: 12px;
+    background: #fffdf6;
+}
+
+.menu-item {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 48px;
+    padding: 9px 12px;
+    border: 1px solid #dbc8a4;
+    border-radius: 12px;
+    background: #fffdf6;
+    color: #493724;
+    text-align: left;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.menu-item:hover,
+.settings-back:hover,
+.settings-close:hover {
+    background: #f5e8ce;
+}
+
+.menu-item > span:first-child {
+    font-size: 20px;
+    text-align: center;
+}
+
+.menu-item-arrow {
+    color: #8a6c43;
+    font-size: 25px;
+}
+
+.settings-subheader {
+    justify-content: flex-start;
+}
+
+.settings-subheader h3 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.settings-back {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #b99b6b;
+    border-radius: 9px;
+    background: #fffdf6;
+    color: #59432d;
+    font: inherit;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.settings-group h4 {
+    margin: 0 0 12px;
+    font-size: 16px;
+}
+
+.settings-panel label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.settings-panel input {
+    width: 100%;
+    margin: 14px 0 0;
+    accent-color: #12ad49;
+}
+
+/* MÀU NÚT DI CHUYỂN: dùng tông kem, vàng và nâu giống bảng menu của game. */
+.control {
+    display: grid;
+    place-items: center;
+    border: 2px solid #725332;
+    border-radius: 0;
+    background: linear-gradient(145deg, #fff8e8, #e6c993);
+    color: #59432d;
+    font-size: 0;
+    touch-action: none;
+    cursor: pointer;
+    transition: filter 100ms ease;
+}
+
+.control::before {
+    content: "";
+    width: 32px;
+    height: 32px;
+    background: #59432d;
+    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+}
+
+.control.up { border-radius: 20px 20px 0 0; }
+.control.left { border-radius: 20px 0 0 20px; }
+.control.down { border-radius: 0 0 20px 20px; }
+.control.right { border-radius: 0 20px 20px 0; }
+.control.left::before { transform: rotate(-90deg); }
+.control.down::before { transform: rotate(180deg); }
+.control.right::before { transform: rotate(90deg); }
+
+.control:hover {
+    filter: brightness(1.07);
+}
+
+.control:active {
+    filter: brightness(.82);
+}
+
+.control-center {
+    grid-area: center;
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    box-sizing: border-box;
+    border: 2px solid #725332;
+    border-radius: 0;
+    background: linear-gradient(145deg, #fff8e8, #e6c993);
+}
+
+.control-center::before {
+    content: "";
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #59432d;
+}
+
+.control.up { grid-area: up; }
+.control.left { grid-area: left; }
+.control.down { grid-area: down; }
+.control.right { grid-area: right; }
+
+.grass {
+    position: absolute;
+    inset: 0;
+    background-image: url("../assets/map/grass.png");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    pointer-events: none;
+}
+
+.path {
+    position: absolute;
+    left: 0;
+    top: calc(250px + var(--map-top-expansion));
+    width: 100%;
+    height: 90px;
+    background-color: #d8b27a;
+    background-image: url("../assets/map/path.png");
+    background-repeat: repeat-x;
+    background-size: auto 90px;
+    z-index: 1;
+}
+
+.path-branch-1 {
+    /* Đường nhánh 1: dịch trái tổng cộng 350px so với vị trí ban đầu. */
+    left: calc(300px + var(--map-left-expansion) - 395px);
+    top: calc(295px + var(--map-top-expansion));
+    width: 90px;
+    height: auto;
+    bottom: 0;
+    background-repeat: repeat-y;
+    background-size: 90px auto;
+}

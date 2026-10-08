@@ -1,0 +1,17 @@
+/* Nhà kho pixel art trong khu vực storage */
+.storage {
+    position: absolute;
+    left: calc(1500px + var(--map-left-expansion));
+    top: calc(50px + var(--map-top-expansion));
+    width: 240px;
+    height: 200px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.storage img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+}

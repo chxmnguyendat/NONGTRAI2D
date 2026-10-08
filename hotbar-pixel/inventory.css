@@ -1,0 +1,86 @@
+/* Giao diện túi đồ: tách riêng để dễ chỉnh sửa và nâng cấp. */
+.inventory-bar {
+    --inventory-scale: 1;
+    position: absolute;
+    left: calc(50% - 20px);
+    bottom: 45px;
+    z-index: 3;
+    translate: -50% 0;
+    transform: scale(var(--inventory-scale));
+    transform-origin: center bottom;
+    transition: transform 120ms ease;
+    user-select: none;
+    filter: drop-shadow(0 4px 5px #16341f66);
+}
+
+.inventory-slots {
+    display: flex;
+    gap: 6px;
+    padding: 7px;
+    border: 3px solid #62452c;
+    border-radius: 8px;
+    background: linear-gradient(#d8b879, #a97b45);
+    box-shadow: inset 0 2px 0 #f5dfa7, 0 3px 0 #533a28;
+}
+
+.inventory-capacity {
+    display: block;
+    margin-bottom: 4px;
+    color: #fff5d8;
+    font: 700 20px/1.2 system-ui, sans-serif;
+    text-align: right;
+    text-shadow: 0 1px 2px #352518;
+}
+
+.inventory-slot {
+    position: relative;
+    display: grid;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    box-sizing: border-box;
+    border: 2px solid #725334;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #f1dfb8, #d2b783);
+    box-shadow: inset 0 2px 3px #73583455;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.inventory-slot:hover:not(:empty) { filter: brightness(1.08); }
+.inventory-slot:focus-visible { outline: 3px solid #fff5a8; outline-offset: 2px; }
+
+.inventory-item-icon { font-size: 27px; line-height: 1; }
+.inventory-slot-key {
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    color: #725334;
+    font: 700 10px/1 system-ui, sans-serif;
+    opacity: .75;
+    pointer-events: none;
+}
+.inventory-item-count {
+    position: absolute;
+    right: 30px;
+    bottom: 0;
+    color: #000000;
+    font: 700 18px/1.1 system-ui, sans-serif;
+    text-shadow: 0 1px 1px #fff;
+}
+
+.game.is-customizing .inventory-bar {
+    z-index: 20;
+    cursor: grab;
+    touch-action: none;
+    outline: 2px dashed #fff8e8;
+}
+
+@media (max-width: 600px) {
+    .inventory-bar { left: calc(50% - 20px); bottom: 30px; }
+    .inventory-slot { width: 50px; height: 50px; }
+    .inventory-slots { gap: 4px; padding: 5px; }
+}

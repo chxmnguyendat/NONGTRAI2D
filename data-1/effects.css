@@ -1,0 +1,28 @@
+/* HIỆU ỨNG CHỌN VẬT THỂ: mọi vật thể có class selectable-object sẽ sáng khi ở gần. */
+.selectable-object {
+    --selectable-glow-color: #ffe783;
+}
+
+.selectable-object.is-nearby {
+    filter: drop-shadow(0 0 7px var(--selectable-glow-color))
+        drop-shadow(0 0 15px #ffe783b8);
+    animation: selectable-object-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes selectable-object-glow {
+    from {
+        filter: drop-shadow(0 0 5px var(--selectable-glow-color))
+            drop-shadow(0 0 10px #ffe78388);
+    }
+    to {
+        filter: drop-shadow(0 0 9px var(--selectable-glow-color))
+            drop-shadow(0 0 19px #ffe783d9);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .selectable-object.is-nearby {
+        animation: none;
+    }
+
+}

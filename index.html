@@ -1,50 +1,294 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Nông Trại Đạt</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Farming Pixel v1.0</title>
+    <link rel="stylesheet" href="data/style.css">
+    <link rel="stylesheet" href="data-1/storage.css">
+    <link rel="stylesheet" href="data-1/farm.css">
+    <link rel="stylesheet" href="data-1/fence.css">
+    <link rel="stylesheet" href="data-1/effects.css">
+    <link rel="stylesheet" href="effectplayer/player-effects.css">
+    <link rel="stylesheet" href="hotbar-pixel/inventory.css">
+    <link rel="stylesheet" href="hotbar-pixel/player-status.css">
+    <link rel="stylesheet" href="save/game-backups.css">
 </head>
 
 <body>
 
     <div class="game">
-     
-        // code cỏ //
+
+        <section class="start-screen" id="start-screen" aria-label="Màn hình bắt đầu game">
+            <div class="start-screen-content">
+                <div class="start-screen-logo" aria-label="Farming Pixel">
+                    <img class="start-screen-logo-image" src="assets/ui/farming-pixel-logo.svg" alt="Farming Pixel">
+                </div>
+                <p class="start-screen-version">VERSION 1.0</p>
+                <button class="start-screen-play" id="start-screen-play" type="button" aria-label="Bắt đầu game"></button>
+            </div>
+        </section>
+
+        <section class="world-select-gate" id="world-select-gate" aria-labelledby="world-select-title" hidden>
+            <div class="world-select-card">
+                <p class="player-name-eyebrow">FARMING PIXEL <span class="brand-heart" aria-hidden="true">♥</span></p>
+                <h1 id="world-select-title">Chọn nông trại</h1>
+                <p class="world-select-description">Mỗi nông trại có tiến trình riêng. Tạo map mới để bắt đầu lại.</p>
+                <div class="world-slot-list" id="world-slot-list"></div>
+                <form class="world-create-form" id="world-create-form" hidden>
+                    <label for="world-name-input">Tên map mới</label>
+                    <input id="world-name-input" type="text" maxlength="24" placeholder="Ví dụ: Nông Trại Test" required>
+                    <div class="world-create-actions">
+                        <button type="button" class="world-cancel-button" id="world-create-cancel">Hủy</button>
+                        <button type="submit" class="world-create-submit">Tạo map</button>
+                    </div>
+                </form>
+                <button class="world-select-back" id="back-to-title" type="button">← Quay lại</button>
+            </div>
+        </section>
+
+        <section class="player-name-gate" id="player-name-gate" aria-labelledby="player-name-title" hidden>
+            <form class="player-name-card" id="player-name-form">
+                <button class="player-name-back" id="back-to-world-select" type="button">&#8592; Quay lại chọn map</button>
+                <div class="player-name-avatar" aria-hidden="true"></div>
+                <p class="player-name-eyebrow">FARMING PIXEL V1.0 <span class="brand-heart" aria-hidden="true">♥</span></p>
+                <h1 id="player-name-title">Chào mừng đến nông trại!</h1>
+                <p class="player-name-description">Bạn muốn mọi người gọi mình là gì?</p>
+                <span class="player-gender-label">Chọn nhân vật</span>
+                <div class="player-gender-options" role="group" aria-label="Chọn nhân vật">
+                    <button class="player-gender-option" type="button" data-gender="male" aria-pressed="false">
+                        <span class="player-gender-icon" aria-hidden="true">&#9794;</span>
+                        <span>Nam</span>
+                    </button>
+                    <button class="player-gender-option" type="button" data-gender="female" aria-pressed="false">
+                        <span class="player-gender-icon" aria-hidden="true">&#9792;</span>
+                        <span>Nữ</span>
+                    </button>
+                </div>
+                <span class="player-gender-selection" id="player-gender-selection" role="status" aria-live="polite"></span>
+                <label for="player-name-input">Tên nhân vật</label>
+                <input id="player-name-input" name="playerName" type="text" maxlength="20" autocomplete="nickname" placeholder="Nhập tên của bạn" required>
+                <button type="submit">Bắt đầu chơi</button>
+            </form>
+        </section>
+
+        <!-- BẢN ĐỒ GAME: toàn bộ cảnh vật và nhân vật nằm trong world; thêm địa hình/đồ vật mới vào đây. -->
+        <div class="world">
+
         <div class="grass"></div>
 
-        // đường //
-
         <div class="path"></div>
+        <!-- Đường nhánh 1: nhánh dọc đi xuống từ đường chính. -->
+        <div class="path path-branch-1" aria-hidden="true"></div>
+        <div class="storage" role="img" aria-label="Nhà kho nông sản">
+            <img src="assets/map/storage-shed.png" alt="">
+        </div>
+        <!-- CÂY TÁO: sprite sheet, trạng thái tưới/chín và nút thu hoạch; sửa giao diện tại farm.css, logic tại script.js -->
+        <section class="apple-tree selectable-object" data-stage="waiting" aria-label="Cây táo">
+            <div class="apple-tree-sprite" role="img" aria-label="Cây táo pixel art"></div>
+            <div class="apple-tree-panel" hidden>
+                <div class="tree-panel-heading">
+                    <strong>Vườn táo</strong>
+                    
+                </div>
+                <p class="tree-status" aria-live="polite">Chọn tưới cây để thu hoạch táo nhé!</p>
+                <div class="tree-progress" role="progressbar" aria-label="Tiến độ cây ra quả" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
+                    <span class="tree-progress-fill"></span>
+                </div>
+                <button class="tree-action" type="button">💧 Tưới cây</button>
+            </div>
+        </section>
+        <!-- Hàng rào vườn táo dùng lớp fence-enclosure để có thể tái sử dụng ở khu vực khác. -->
+        <div class="fence-enclosure orchard-fence" data-fence-collision="solid" aria-hidden="true">
+            <span class="fence-run fence-run--bottom"></span>
+        </div>
+        <!-- HÀNG CÂY TÁO: các cây có thể chọn, tưới và thu hoạch; giữ khoảng cách để sau này đặt hàng rào. -->
+        <!-- VƯỜN TÁO MỞ RỘNG: mỗi cây có trạng thái/timer và bảng chăm sóc độc lập; xử lý chung nằm trong script.js. -->
+        <section class="apple-tree orchard-tree orchard-tree-2 selectable-object" data-stage="waiting" aria-label="Cây táo thứ hai">
+            <div class="apple-tree-sprite" role="img" aria-label="Cây táo pixel art"></div>
+            <div class="apple-tree-panel" hidden><div class="tree-panel-heading"><strong>Vườn táo</strong></div><p class="tree-status" aria-live="polite">Chọn tưới cây để thu hoạch táo nhé!</p><div class="tree-progress" role="progressbar" aria-label="Tiến độ cây ra quả" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span class="tree-progress-fill"></span></div><button class="tree-action" type="button">💧 Tưới cây</button></div>
+        </section>
+        <section class="apple-tree orchard-tree orchard-tree-3 selectable-object" data-stage="waiting" aria-label="Cây táo thứ ba">
+            <div class="apple-tree-sprite" role="img" aria-label="Cây táo pixel art"></div>
+            <div class="apple-tree-panel" hidden><div class="tree-panel-heading"><strong>Vườn táo</strong></div><p class="tree-status" aria-live="polite">Chọn tưới cây để thu hoạch táo nhé!</p><div class="tree-progress" role="progressbar" aria-label="Tiến độ cây ra quả" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span class="tree-progress-fill"></span></div><button class="tree-action" type="button">💧 Tưới cây</button></div>
+        </section>
+        <section class="apple-tree orchard-tree orchard-tree-4 selectable-object" data-stage="waiting" aria-label="Cây táo thứ tư">
+            <div class="apple-tree-sprite" role="img" aria-label="Cây táo pixel art"></div>
+            <div class="apple-tree-panel" hidden><div class="tree-panel-heading"><strong>Vườn táo</strong></div><p class="tree-status" aria-live="polite">Chọn tưới cây để thu hoạch táo nhé!</p><div class="tree-progress" role="progressbar" aria-label="Tiến độ cây ra quả" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span class="tree-progress-fill"></span></div><button class="tree-action" type="button">💧 Tưới cây</button></div>
+        </section>
+        <!-- HÀNG CÂY TÁO 2: giữ cùng khoảng cách ngang và cách hàng đầu 220px; vị trí hàng được đặt trong farm.css bằng .orchard-row-2. -->
+        <section class="apple-tree orchard-tree orchard-row-2 selectable-object" data-stage="waiting" aria-label="Cây táo thứ năm">
+            <div class="apple-tree-sprite" role="img" aria-label="Cây táo pixel art"></div>
+            <div class="apple-tree-panel" hidden><div class="tree-panel-heading"><strong>Vườn táo</strong></div><p class="tree-status" aria-live="polite">Chọn tưới cây để thu hoạch táo nhé!</p><div class="tree-progress" role="progressbar" aria-label="Tiến độ cây ra quả" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span class="tree-progress-fill"></span></div><button class="tree-action" type="button">💧 Tưới cây</button></div>
+        </section>
+        <section class="apple-tree orchard-tree orchard-row-2 orchard-tree-2 selectable-object" data-stage="waiting" aria-label="Cây táo thứ sáu">
+            <div class="apple-tree-sprite" role="img" aria-label="Cây táo pixel art"></div>
+            <div class="apple-tree-panel" hidden><div class="tree-panel-heading"><strong>Vườn táo</strong></div><p class="tree-status" aria-live="polite">Chọn tưới cây để thu hoạch táo nhé!</p><div class="tree-progress" role="progressbar" aria-label="Tiến độ cây ra quả" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span class="tree-progress-fill"></span></div><button class="tree-action" type="button">💧 Tưới cây</button></div>
+        </section>
+        <section class="apple-tree orchard-tree orchard-row-2 orchard-tree-3 selectable-object" data-stage="waiting" aria-label="Cây táo thứ bảy">
+            <div class="apple-tree-sprite" role="img" aria-label="Cây táo pixel art"></div>
+            <div class="apple-tree-panel" hidden><div class="tree-panel-heading"><strong>Vườn táo</strong></div><p class="tree-status" aria-live="polite">Chọn tưới cây để thu hoạch táo nhé!</p><div class="tree-progress" role="progressbar" aria-label="Tiến độ cây ra quả" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span class="tree-progress-fill"></span></div><button class="tree-action" type="button">💧 Tưới cây</button></div>
+        </section>
+        <section class="apple-tree orchard-tree orchard-row-2 orchard-tree-4 selectable-object" data-stage="waiting" aria-label="Cây táo thứ tám">
+            <div class="apple-tree-sprite" role="img" aria-label="Cây táo pixel art"></div>
+            <div class="apple-tree-panel" hidden><div class="tree-panel-heading"><strong>Vườn táo</strong></div><p class="tree-status" aria-live="polite">Chọn tưới cây để thu hoạch táo nhé!</p><div class="tree-progress" role="progressbar" aria-label="Tiến độ cây ra quả" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span class="tree-progress-fill"></span></div><button class="tree-action" type="button">💧 Tưới cây</button></div>
+        </section>
+        <!-- KHU VUC FARM: sua giao dien rieng trong farm.css -->
+        <section class="farm" aria-label="Farm 1">
+            <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
+            <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
+            <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
+        </section>
 
-        // FARM //
-    <div class="farm">
-         <div class="fence"></div>
+        <section class="farm farm-2" aria-label="Farm 2">
+            <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
+            <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
+            <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
+        </section>
 
-        <div class="soil-row"></div>
-        <div class="soil-row"></div>
-        <div class="soil-row"></div>
-    </div>
+        <section class="farm farm-3" aria-label="Farm 3">
+            <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
+            <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
+            <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
+        </section>
 
-       // nhà //
-    <div class="house">
-    <img src="assets/map/house.png" alt="Ngôi nhà">
-    </div>
-  
-    // cây //
-    <div class="tree">
-    <img src="assets/map/tree.png" alt="Cây">
-    </div>
-    
-        // nhân vật //
         <div class="player">
-            <img src="assets/player/player.png" alt="Nhân vật">
-       
-    
+            <div class="landing-wind" id="landing-wind" aria-hidden="true">
+                <span class="wind-streak wind-streak-left"></span>
+                <span class="wind-streak wind-streak-right"></span>
+                <span class="wind-streak wind-streak-low-left"></span>
+                <span class="wind-streak wind-streak-low-right"></span>
+            </div>
+            <div class="player-sprite is-standing" role="img" aria-label="Nhân vật"></div>
+            <div class="entry-greeting" id="entry-greeting" role="status" aria-live="polite" hidden>Hi</div>
         </div>
 
+        </div>
+
+        <section class="player-status" aria-label="Thông tin nhân vật">
+            <div class="player-status-profile">
+                <div class="player-status-avatar" role="img" aria-label="Ảnh đại diện nhân vật"></div>
+                <div class="player-status-identity"><span>Nhân vật</span><strong id="player-name-label">Nhà nông</strong></div>
+            </div>
+            <div class="player-stat">
+                <div class="player-stat-label"><span>❤️ HP</span><output id="player-hp-value">100%</output></div>
+                <div class="player-stat-track" role="progressbar" aria-label="Máu" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span id="player-hp-fill"></span></div>
+            </div>
+            <div class="player-stat">
+                <div class="player-stat-label"><span>💧 Nước</span><output id="player-water-value">100%</output></div>
+                <div class="player-stat-track" role="progressbar" aria-label="Nước trong cơ thể" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span id="player-water-fill"></span></div>
+            </div>
+            <div class="player-stat">
+                <div class="player-stat-label"><span>🍽️ No</span><output id="player-food-value">100%</output></div>
+                <div class="player-stat-track" role="progressbar" aria-label="Mức độ no" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span id="player-food-fill"></span></div>
+            </div>
+        </section>
+
+        <!-- ĐIỀU KHIỂN NHÂN VẬT: cụm D-pad dùng nút và mũi tên mặc định của game. -->
+        <div class="controls" aria-label="Điều khiển nhân vật">
+            <button class="control up" data-direction="up" aria-label="Đi lên">&#9650;</button>
+            <button class="control left" data-direction="left" aria-label="Đi sang trái">&#9664;</button>
+            <div class="control-center" aria-hidden="true"></div>
+            <button class="control down" data-direction="down" aria-label="Đi xuống">&#9660;</button>
+            <button class="control right" data-direction="right" aria-label="Đi sang phải">&#9654;</button>
+        </div>
+
+        <section class="inventory-bar" aria-label="Túi vật phẩm" aria-live="polite">
+            <output class="inventory-capacity" aria-label="Tổng số vật phẩm">0/100</output>
+            <div class="inventory-slots"></div>
+        </section>
+
+        <!-- NÚT CHỌN MỤC TIÊU: chỉ chọn/bỏ chọn cây trong phạm vi gần, không thực hiện hành động chăm sóc. -->
+        <div class="target-select-widget">
+            <button class="target-select-button" id="target-select-button" type="button" aria-pressed="false" disabled>
+                <span id="target-select-label">Chọn</span>
+                <span class="target-select-icon target-select-check" id="target-select-check" aria-hidden="true">&#10003;</span>
+                <span class="target-select-icon target-select-cancel" id="target-select-cancel" aria-hidden="true" hidden>&times;</span>
+            </button>
+        </div>
+
+        <!-- MENU GAME: nơi chứa các tùy chỉnh giao diện và điều khiển của trò chơi. -->
+        <button class="settings-toggle" type="button" aria-expanded="false" aria-controls="settings-panel" aria-label="M&#7903; menu game">&#9776;</button>
+        <button class="menu-backdrop" id="menu-backdrop" type="button" aria-label="Ti&#7871;p t&#7909;c tr&#242; ch&#417;i" hidden></button>
+        <section class="settings-panel" id="settings-panel" aria-label="Menu game" hidden>
+            <div class="settings-panel-header menu-header">
+                <h2>Menu game</h2>
+                <button class="settings-close" id="settings-close" type="button" aria-label="&#272;&#243;ng menu">&times;</button>
+            </div>
+            <!-- DANH MỤC MENU: thêm các mục game mới vào danh sách này về sau. -->
+            <div class="menu-screen" id="menu-home">
+                <button class="menu-item" id="open-game-settings" type="button">
+                    <span aria-hidden="true">&#9881;</span>
+                    <span>C&#224;i &#273;&#7863;t</span>
+                    <span class="menu-item-arrow" aria-hidden="true">&#8250;</span>
+                </button>
+                <button class="menu-item" id="open-world-select" type="button">
+                    <span aria-hidden="true">&#8592;</span>
+                    <span>Thoát ra</span>
+                    <span class="menu-item-arrow" aria-hidden="true">&#8250;</span>
+                </button>
+                <button class="menu-item" id="return-to-title" type="button">
+                    <span aria-hidden="true">&#8962;</span>
+                    <span>Về màn hình chính</span>
+                    <span class="menu-item-arrow" aria-hidden="true">&#8250;</span>
+                </button>
+            </div>
+            <!-- CÀI ĐẶT GAME: hiện khi người chơi chọn mục Cài đặt trong menu. -->
+            <div class="menu-screen" id="game-settings" hidden>
+                <div class="settings-panel-header settings-subheader">
+                    <button class="settings-back" id="settings-back" type="button" aria-label="Quay l&#7841;i menu">&#8592;</button>
+                    <h3>C&#224;i &#273;&#7863;t</h3>
+                </div>
+                <div class="settings-group">
+                    <h4>Điều khiển</h4>
+                    <label for="controls-size">K&#237;ch th&#432;&#7899;c n&#250;t: <output id="controls-size-value">100%</output></label>
+                    <input id="controls-size" type="range" min="60" max="150" step="5" value="100">
+                    <label for="inventory-size">Kích thước túi đồ: <output id="inventory-size-value">100%</output></label>
+                    <input id="inventory-size" type="range" min="60" max="150" step="5" value="100">
+                    <!-- TÙY BIẾN NÚT: bật chế độ kéo cụm điều khiển và nút Chọn tới vị trí mong muốn. -->
+                    <button class="customize-controls-button" id="customize-controls" type="button">T&#249;y bi&#7871;n n&#250;t</button>
+                </div>
+                <div class="settings-group">
+                    <h4>Camera</h4>
+                    <label for="camera-zoom">Thu phóng: <output id="camera-zoom-value">140%</output></label>
+                    <input id="camera-zoom" type="range" min="80" max="180" step="5" value="140">
+                </div>
+            </div>
+        </section>
+        <div class="customize-toolbar" id="customize-toolbar" hidden>
+            <span>K&#233;o c&#225;c n&#250;t &#273;&#7871;n v&#7883; tr&#237; b&#7841;n mu&#7889;n</span>
+            <button id="finish-customizing" type="button">Xong</button>
+        </div>
+
+        <aside class="game-backup-widget" id="game-backup-widget" hidden>
+            <button class="game-backup-toggle" id="game-backup-toggle" type="button" aria-expanded="false" aria-controls="game-backup-panel">Sao lưu</button>
+            <button class="game-backup-reset" id="game-backup-reset" type="button">Fix l&#7895;i</button>
+            <section class="game-backup-panel" id="game-backup-panel" aria-labelledby="game-backup-title" hidden>
+                <div class="game-backup-header">
+                    <h2 id="game-backup-title">Sao lưu game</h2>
+                    <button class="game-backup-close" id="game-backup-close" type="button" aria-label="Đóng">×</button>
+                </div>
+                <p class="game-backup-description">Lưu tiến trình và cài đặt game trên thiết bị này. Tối đa 3 bản.</p>
+                <button class="game-backup-create" id="game-backup-create" type="button">＋ Sao lưu ngay</button>
+                <p class="game-backup-notice" id="game-backup-notice" role="status" aria-live="polite"></p>
+                <div class="game-backup-list" id="game-backup-list"></div>
+            </section>
+        </aside>
+        <div class="scene-fade is-active" id="scene-fade" aria-hidden="true"></div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- CAMERA GAME: nạp bộ điều khiển camera trước script chính. -->
+    <script src="assets/camera-player/zoom.js"></script>
+    <script src="assets/camera-player/camera.js"></script>
+    <script src="save/game-save.js"></script>
+    <script src="save/scene-transitions.js"></script>
+    <script src="save/world-select.js"></script>
+    <!-- APPLE TREE SYSTEM: logic is isolated here for future orchard upgrades. -->
+    <script src="data-1/apple-trees.js"></script>
+    <script src="data-1/fence.js"></script>
+    <script src="hotbar-pixel/inventory.js"></script>
+    <script src="hotbar-pixel/player-status.js"></script>
+    <script src="data/script.js"></script>
+    <script src="save/game-backups.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,122 @@
+/*
+ * BACKUP GIAO DIỆN NÚT GỐC
+ * Sao lưu trước khi áp dụng button-icons.svg.
+ * Để khôi phục kiểu nút cũ, nạp stylesheet này sau style.css.
+ */
+
+.controls {
+    filter: drop-shadow(0 7px 7px #16341f66);
+}
+
+.target-select-button {
+    display: flex;
+    width: 100%;
+    min-height: 64px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 3px solid #73522f;
+    border-radius: 17px;
+    background: linear-gradient(145deg, #b9ec83, #68b84e);
+    color: #29451f;
+    font: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #486d35, 0 8px 12px #26351e44;
+    transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease;
+}
+
+.target-select-button:hover:not(:disabled) { filter: brightness(1.07); transform: translateY(-2px); }
+.target-select-button:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 #486d35; }
+.target-select-button:disabled {
+    border-color: #72654e;
+    background: linear-gradient(145deg, #d6d0be, #aaa28c);
+    color: #514b40;
+    cursor: default;
+    opacity: .76;
+    box-shadow: 0 4px 0 #716958;
+}
+.target-select-button[aria-pressed="true"] { background: linear-gradient(145deg, #ffe88d, #e9aa43); color: #49321d; }
+.target-select-icon { font-size: 20px; font-weight: 900; }
+.target-select-check { color: #23843a; }
+.target-select-cancel { color: #c83232; }
+
+.settings-toggle {
+    display: revert;
+    padding: revert;
+    top: 24px;
+    right: 24px;
+    width: 52px;
+    height: 52px;
+    border: 2px solid #725332;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #fff8e8, #e6c993);
+    color: #59432d;
+    font-size: 30px;
+    box-shadow: 0 4px 0 #725332, 0 7px 12px #26351e44;
+}
+
+.settings-close {
+    border: 1px solid #b99b6b;
+    border-radius: 9px;
+    background: #fffdf6;
+    color: #59432d;
+    font-size: 23px;
+}
+
+.settings-back {
+    border: 1px solid #b99b6b;
+    border-radius: 9px;
+    background: #fffdf6;
+    color: #59432d;
+    font-size: 20px;
+}
+
+.menu-item {
+    border: 1px solid #dbc8a4;
+    border-radius: 12px;
+    background: #fffdf6;
+    color: #493724;
+}
+
+.control {
+    border: 0;
+    border-radius: 0;
+    background: #12ad49;
+    color: #fff;
+    font-size: 0;
+    filter: none;
+}
+
+.control::before {
+    display: block;
+    content: "";
+    width: 32px;
+    height: 32px;
+    background: #fff;
+    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+}
+
+.control.up { border-radius: 20px 20px 0 0; }
+.control.left { border-radius: 20px 0 0 20px; }
+.control.down { border-radius: 0 0 20px 20px; }
+.control.right { border-radius: 0 20px 20px 0; }
+.control.left::before { transform: rotate(-90deg); }
+.control.down::before { transform: rotate(180deg); }
+.control.right::before { transform: rotate(90deg); }
+.control:hover { background: #20c653; filter: none; }
+.control:active { transform: none; filter: brightness(.82); }
+.control-center { border-radius: 0; background: #12ad49; }
+.control-center::before { display: block; content: ""; width: 42px; height: 42px; border-radius: 50%; background: #fff; }
+
+.settings-toggle .pixel-icon,
+.settings-close .pixel-icon,
+.settings-back .pixel-icon,
+.menu-item .pixel-icon,
+.control .pixel-icon,
+.control-center .pixel-icon,
+.target-select-icon .pixel-icon { display: none; }
+.pixel-label-original,
+.pixel-item-icon-original { display: inline; }

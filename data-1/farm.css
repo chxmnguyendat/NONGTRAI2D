@@ -1,0 +1,291 @@
+﻿/* KHU VUC FARM: vi tri, hang dat trong va cay non */
+.farm {
+    --farm-width: min(440px, calc(33.333vw - 106.67px));
+    position: absolute;
+    left: calc(100px + var(--map-left-expansion));
+    top: calc(400px + var(--map-top-expansion));
+    width: var(--farm-width);
+    height: 260px;
+    box-sizing: border-box;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    padding: 26px 22px 18px;
+    border: 8px solid #76502f;
+    background: linear-gradient(135deg, #b1834e, #8e633b);
+    box-shadow: inset 0 0 0 4px #c5985d, 0 7px 0 #553b27;
+}
+
+.soil-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 2px 8px;
+    border: 3px solid #573b27;
+    border-radius: 4px;
+    background: repeating-linear-gradient(0deg, #68472d 0 5px, #795334 6px 10px);
+    box-shadow: inset 0 3px 0 #9b7045, 0 2px 0 #503824;
+}
+
+.crop {
+    position: relative;
+    width: 24px;
+    height: 27px;
+    flex: 0 0 24px;
+    background: linear-gradient(90deg, transparent 42%, #4d7d35 43% 57%, transparent 58%) center bottom / 5px 13px no-repeat;
+}
+
+.crop::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 9px;
+    background:
+        radial-gradient(ellipse at 20% 80%, #7fcb4e 0 30%, transparent 33%),
+        radial-gradient(ellipse at 80% 80%, #56ad3c 0 30%, transparent 33%),
+        radial-gradient(ellipse at 50% 35%, #378d37 0 30%, transparent 33%);
+}
+
+.farm-2 {
+    left: calc(200px + var(--farm-width) + var(--map-left-expansion));
+    top: calc(400px + var(--map-top-expansion));
+}
+
+.farm-3 {
+    left: calc(300px + var(--farm-width) + var(--farm-width) + var(--map-left-expansion));
+    top: calc(400px + var(--map-top-expansion));
+}
+
+/* CÂY TÁO: vị trí cây và bảng tưới/thu hoạch; đổi kích thước, vị trí tại đây */
+.apple-tree {
+    position: absolute;
+    left: calc(1100px + var(--map-left-expansion));
+    top: calc(18px + var(--map-top-expansion));
+    z-index: 1;
+    width: 190px;
+    text-align: center;
+}
+
+/* HÀNG CÂY TÁO: cây tương tác từ cây chính sang trái, cách nhau 350px và tránh khu nhà kho bên phải. */
+.orchard-tree {
+    pointer-events: auto;
+}
+
+.orchard-tree-2 { left: calc(750px + var(--map-left-expansion)); }
+.orchard-tree-3 { left: calc(400px + var(--map-left-expansion)); }
+.orchard-tree-4 { left: calc(50px + var(--map-left-expansion)); }
+
+/* HÀNG CÂY TÁO 2: nằm phía trên hàng đầu, cách nhau 220px để tán cây không chạm nhau. */
+.orchard-row-2 { top: calc(-202px + var(--map-top-expansion)); }
+
+
+/* Sprite sheet 5x5 đã tách nền: đổi ảnh hoặc tốc độ frame tại đây. */
+.apple-tree-sprite {
+    display: block;
+    width: 170px;
+    height: 170px;
+    margin: 0 auto -8px;
+    background-image: url("../assets/map/apple-tree-sheet-transparent.png");
+    background-repeat: no-repeat;
+    background-size: 500% 500%;
+    background-position-x: 0%;
+    background-position-y: var(--sprite-row, 0%);
+    image-rendering: pixelated;
+    transition: filter .35s ease, transform .35s ease;
+    animation: apple-sprite 1.2s steps(4, end) infinite;
+}
+
+/* CÂY CÓ THỂ CHỌN: phát sáng khi người chơi tiến sát để báo hiệu tương tác được. */
+.apple-tree.is-nearby .apple-tree-sprite {
+    filter: drop-shadow(0 0 8px #fff1a8);
+}
+
+.apple-tree[data-stage="watered"] .apple-tree-sprite {
+    --sprite-row: 25%;
+    filter: drop-shadow(0 0 8px #83d9ff);
+    animation: apple-sprite 1.2s steps(4, end) infinite, watered-tree 1.6s ease-in-out infinite alternate;
+}
+
+.apple-tree[data-stage="ripe"] .apple-tree-sprite {
+    --sprite-row: 100%;
+    filter: drop-shadow(0 0 9px #ffd55a);
+}
+
+/* TƯỚI CÂY: thẻ trạng thái, nút thao tác, bộ đếm táo và thanh tiến độ. */
+.apple-tree-panel {
+    position: relative;
+    z-index: 1;
+    width: 210px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 11px;
+    border: 2px solid #76502f;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #fff9e9f5, #f0d8aef5);
+    box-shadow: 0 4px 0 #553b27, 0 7px 14px #35251855;
+    color: #493724;
+    font-size: 12px;
+}
+
+.apple-tree-panel[hidden] {
+    display: none;
+}
+
+/* THANH TIẾN ĐỘ NỔI: báo phần trăm trên tán cây khi cây đang lớn và bảng cây đóng. */
+.tree-world-progress {
+    position: absolute;
+    z-index: 2;
+    top: -24px;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 112px;
+    box-sizing: border-box;
+    padding: 4px 6px;
+    transform: translateX(-50%);
+    border: 1px solid #76502f;
+    border-radius: 8px;
+    background: #fff9e9ed;
+    box-shadow: 0 2px 5px #35251855;
+    color: #493724;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.tree-world-progress[hidden] {
+    display: none;
+}
+
+.tree-world-growing {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.tree-world-growing[hidden],
+.tree-world-ready[hidden] {
+    display: none;
+}
+
+.tree-world-ready {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.tree-world-progress-track {
+    flex: 1;
+    height: 7px;
+    overflow: hidden;
+    border: 1px solid #98784b;
+    border-radius: 999px;
+    background: #d6c39c;
+}
+
+.tree-world-progress-fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #7dcc57, #f5c94d);
+    transition: width .25s ease;
+}
+
+.tree-world-progress output {
+    min-width: 27px;
+    text-align: right;
+}
+
+.tree-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+#tree-status {
+    min-height: 30px;
+    margin: 0 0 8px;
+    color: #665239;
+    line-height: 1.25;
+}
+
+/* NÚT RIÊNG CÂY TÁO: trạng thái tưới, chờ chín và thu hoạch. */
+.tree-action {
+    width: 100%;
+    min-height: 36px;
+    padding: 7px 10px;
+    border: 1px solid #3b752f;
+    border-radius: 8px;
+    background: linear-gradient(#78c75a, #4d9b3c);
+    color: white;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: inset 0 1px #ffffff55, 0 2px 0 #376c30;
+    transition: filter .15s ease, transform .15s ease, background .2s ease;
+}
+
+.tree-action:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+.tree-action:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: inset 0 1px #ffffff55;
+}
+
+.tree-action:disabled {
+    cursor: wait;
+    filter: saturate(.65);
+    opacity: .8;
+}
+
+.apple-tree[data-stage="ripe"] .tree-action {
+    border-color: #b37817;
+    background: linear-gradient(#ffd86c, #e9a92f);
+    color: #4a3010;
+    box-shadow: inset 0 1px #ffffff88, 0 2px 0 #9a6417;
+}
+
+.tree-progress {
+    height: 8px;
+    margin: 0 0 9px;
+    overflow: hidden;
+    border: 1px solid #98784b;
+    border-radius: 999px;
+    background: #d6c39c;
+}
+
+.tree-progress[hidden] {
+    display: none;
+}
+
+.tree-progress span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #7dcc57, #f5c94d);
+    transition: width .35s ease;
+}
+
+@keyframes watered-tree {
+    to { transform: translateY(-2px); }
+}
+
+@keyframes apple-sprite {
+    to { background-position-x: 100%; }
+}

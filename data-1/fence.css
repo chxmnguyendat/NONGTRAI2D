@@ -1,0 +1,56 @@
+/*
+ * HÀNG RÀO TÁI SỬ DỤNG
+ * Dùng .fence-enclosure kèm bốn .fence-run như trong index.html.
+ * Chỉnh --fence-width, --fence-height và vị trí của enclosure để đặt ở khu vực mới.
+ */
+.fence-enclosure {
+    --fence-sprite-height: 63px;
+    position: absolute;
+    width: var(--fence-width, 1290px);
+    height: var(--fence-height, 230px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.fence-run {
+    position: absolute;
+    display: block;
+    height: var(--fence-sprite-height);
+    background-image: url("../assets/map/hangrao-pixel-1.png");
+    background-repeat: repeat-x;
+    background-size: auto var(--fence-sprite-height);
+    image-rendering: pixelated;
+}
+
+.fence-run--top,
+.fence-run--bottom {
+    left: 0;
+    width: 100%;
+}
+
+.fence-run--top { top: 0; }
+.fence-run--bottom { bottom: 0; }
+
+.fence-run--left,
+.fence-run--right {
+    width: var(--fence-height, 230px);
+    top: calc((var(--fence-height, 230px) - var(--fence-sprite-height)) / 2);
+    transform: rotate(90deg);
+    transform-origin: center;
+}
+
+.fence-run--left {
+    left: calc((var(--fence-sprite-height) - var(--fence-height, 230px)) / 2);
+}
+
+.fence-run--right {
+    right: calc((var(--fence-sprite-height) - var(--fence-height, 230px)) / 2);
+}
+
+/* Vị trí và kích thước hàng rào hiện bao quanh bốn cây táo. */
+.orchard-fence {
+    --fence-width: 1290px;
+    --fence-height: 63px;
+    left: calc(25px + var(--map-left-expansion));
+    top: calc(187px + var(--map-top-expansion));
+}
