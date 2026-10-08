@@ -84,3 +84,29 @@
     .inventory-slot { width: 50px; height: 50px; }
     .inventory-slots { gap: 4px; padding: 5px; }
 }
+
+@media (max-width: 1000px) and (max-height: 500px) {
+    .inventory-bar {
+        bottom: max(8px, env(safe-area-inset-bottom));
+    }
+    .inventory-slot {
+        width: 40px;
+        height: 40px;
+        border-radius: 9px;
+    }
+    .inventory-slots {
+        gap: 3px;
+        padding: 4px;
+    }
+    .inventory-capacity {
+        margin-bottom: 2px;
+        font-size: 14px;
+    }
+    .inventory-item-icon { font-size: 20px; }
+}
+
+@media (max-width: 600px) and (min-height: 501px) {
+    .inventory-bar {
+        bottom: max(174px, calc(env(safe-area-inset-bottom) + 164px));
+    }
+}

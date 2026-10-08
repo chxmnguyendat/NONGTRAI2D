@@ -229,7 +229,7 @@ targetSelectButton.addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", event => {
-    if (event.key.toLowerCase() !== "e" || event.repeat || isPaused || !window.PlayerStatus?.isProfileReady()) return;
+    if (event.key.toLowerCase() !== "e" || event.repeat || isPaused || !window.PlayerProfile?.isProfileReady()) return;
     event.preventDefault();
     toggleSelection();
 });

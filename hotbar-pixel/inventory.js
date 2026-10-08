@@ -65,7 +65,7 @@
             keyHint.setAttribute("aria-hidden", "true");
             slot.append(icon, count, keyHint);
             slot.setAttribute("aria-label", `Ô túi đồ ${index + 1}: ${item.name}, ${item.count} trên ${MAX_STACK}, phím ${index + 1}`);
-            slot.title = item.id === "apple" ? `Nhấn hoặc bấm phím ${index + 1} để ăn táo` : `${item.name} · phím ${index + 1}`;
+            slot.title = `${item.name} · phím ${index + 1}`;
         });
     }
 
@@ -115,26 +115,6 @@
         }
         return requested - remaining;
     }
-
-    function useSlot(index) {
-        const item = items[index];
-        if (!item || item.id !== "apple" || document.querySelector(".game")?.classList.contains("is-customizing")) return;
-        if (removeItem("apple", 1)) {
-            document.dispatchEvent(new CustomEvent("inventory:item-used", { detail: { id: "apple", name: item.name } }));
-        }
-    }
-
-    slots.forEach((slot, index) => slot.addEventListener("click", () => useSlot(index)));
-
-    document.addEventListener("keydown", event => {
-        if (event.repeat || event.ctrlKey || event.altKey || event.metaKey) return;
-        if (event.target instanceof HTMLElement && (event.target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName))) return;
-        const index = Number(event.key) - 1;
-        if (index < 0 || index >= slots.length) return;
-        if (!items[index] || items[index].id !== "apple") return;
-        event.preventDefault();
-        useSlot(index);
-    });
 
     render();
     window.Inventory = Object.freeze({ addItem, getItems, removeItem, slotCount: SLOT_COUNT, maxStack: MAX_STACK });

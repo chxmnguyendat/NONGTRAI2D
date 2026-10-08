@@ -27,10 +27,6 @@ function showPlayerDialogue(line) {
     }, visibleDuration);
 }
 
-document.addEventListener("inventory:item-used", event => {
-    if (event.detail?.id === "apple") showPlayerDialogue("Ngon quá! 🍎");
-});
-
 function scheduleIdleDialogue() {
     const nextInterval = idleDialogueIntervals[Math.floor(Math.random() * idleDialogueIntervals.length)];
 
@@ -101,7 +97,7 @@ document.querySelectorAll(".control").forEach(button => {
     const key = directionKeys[button.dataset.direction];
 
     button.addEventListener("pointerdown", event => {
-        if (gamePaused || !window.PlayerStatus?.isProfileReady()) return;
+        if (gamePaused || !window.PlayerProfile?.isProfileReady()) return;
         event.preventDefault();
         keys[key] = true;
         button.setPointerCapture(event.pointerId);
@@ -129,7 +125,7 @@ const keyboardDirections = {
 
 document.addEventListener("keydown", event => {
     const direction = keyboardDirections[event.key];
-    if (direction && !gamePaused && window.PlayerStatus?.isProfileReady()) {
+    if (direction && !gamePaused && window.PlayerProfile?.isProfileReady()) {
         keys[direction] = true;
         event.preventDefault();
     }
@@ -373,7 +369,6 @@ function setGamePaused(paused) {
     keys.w = keys.a = keys.s = keys.d = false;
 
     AppleTreeSystem.setPaused(paused);
-    window.PlayerStatus?.setPaused(paused);
 }
 
 // MENU GAME: điều hướng giữa danh mục chính và trang cài đặt.
