@@ -55,7 +55,6 @@ player.addEventListener("animationend", event => {
 
 const world = document.querySelector(".world");
 const game = document.querySelector(".game");
-const destinationMarker = document.querySelector("#destination-marker");
 
 // MAP LEFT EXPANSION: đọc cùng biến CSS để giữ nhân vật tại đúng vị trí so với cảnh cũ.
 const mapLeftExpansion = Number.parseFloat(getComputedStyle(world).getPropertyValue("--map-left-expansion")) || 0;
@@ -75,10 +74,6 @@ let lastPlayerSaveAt = 0;
 const speed = 3;
 const keys = {};
 let moveTarget = null;
-let movePath = [];
-let moveTargetTree = null;
-let moveTargetNpc = null;
-let moveTargetWarehouse = null;
 const spriteRows = { down: 0, up: 1, right: 2, left: 3 };
 const spriteFrameCounts = { down: 5, up: 5, right: 6, left: 6 };
 const femaleSpriteFrameCounts = { down: 3, up: 3, right: 2, left: 2 };
@@ -92,211 +87,10 @@ let wasMoving = false;
 let gamePaused = false;
 let isCustomizingControls = false;
 
-const navigationCellSize = 32;
-const destinationArrivalDistance = 2;
-
-function hasReachedMoveTarget() {
-    return Boolean(moveTarget && Math.hypot(moveTarget.x - x, moveTarget.y - y) <= destinationArrivalDistance);
-}
-
-function planPlayerPath(targetX, targetY, playerWidth, playerHeight, collisionWidth, collisionHeight, collisionXOffset, collisionYOffset, obstacles) {
-    const mapWidth = world.offsetWidth;
-    const mapHeight = world.offsetHeight;
-    const columns = Math.ceil(mapWidth / navigationCellSize);
-    const rows = Math.ceil(mapHeight / navigationCellSize);
-    const startCenter = {
-        x: x + playerWidth / 2,
-        y: y + collisionYOffset + collisionHeight / 2
-    };
-    const targetCenter = {
-        x: targetX + playerWidth / 2,
-        y: targetY + collisionYOffset + collisionHeight / 2
-    };
-
-    const nodePosition = (column, row) => {
-        const centerX = column * navigationCellSize + navigationCellSize / 2;
-        const centerY = row * navigationCellSize + navigationCellSize / 2;
-        return {
-            x: centerX - playerWidth / 2,
-            y: centerY - collisionYOffset - collisionHeight / 2
-        };
-    };
-    const isWalkable = (position) =>
-        position.x >= 0 &&
-        position.y >= 0 &&
-        position.x <= mapWidth - playerWidth &&
-        position.y <= mapHeight - playerHeight &&
-        FenceCollision.canOccupy(
-            world,
-            position.x + collisionXOffset,
-            position.y + collisionYOffset,
-            collisionWidth,
-            collisionHeight,
-            obstacles
-        );
-    const findNearestWalkable = (center, radius) => {
-        const baseColumn = Math.floor(center.x / navigationCellSize);
-        const baseRow = Math.floor(center.y / navigationCellSize);
-        const candidates = [];
-        for (let row = Math.max(0, baseRow - radius); row <= Math.min(rows - 1, baseRow + radius); row += 1) {
-            for (let column = Math.max(0, baseColumn - radius); column <= Math.min(columns - 1, baseColumn + radius); column += 1) {
-                const position = nodePosition(column, row);
-                candidates.push({
-                    column,
-                    row,
-                    position,
-                    distance: Math.hypot(
-                        column * navigationCellSize + navigationCellSize / 2 - center.x,
-                        row * navigationCellSize + navigationCellSize / 2 - center.y
-                    )
-                });
-            }
-        }
-        candidates.sort((a, b) => a.distance - b.distance);
-        return candidates.find(candidate => isWalkable(candidate.position));
-    };
-    const start = findNearestWalkable(startCenter, 3);
-    const goal = findNearestWalkable(targetCenter, 5);
-    if (!start || !goal) return [];
-
-    const nodeId = (column, row) => row * columns + column;
-    const heuristic = (column, row) => {
-        const dx = Math.abs(column - goal.column);
-        const dy = Math.abs(row - goal.row);
-        return Math.max(dx, dy) + (Math.SQRT2 - 1) * Math.min(dx, dy);
-    };
-    const heap = [];
-    const heapPush = item => {
-        heap.push(item);
-        let index = heap.length - 1;
-        while (index > 0) {
-            const parentIndex = Math.floor((index - 1) / 2);
-            if (heap[parentIndex].score <= item.score) break;
-            heap[index] = heap[parentIndex];
-            index = parentIndex;
-        }
-        heap[index] = item;
-    };
-    const heapPop = () => {
-        const first = heap[0];
-        const last = heap.pop();
-        if (heap.length && last) {
-            let index = 0;
-            while (true) {
-                const left = index * 2 + 1;
-                const right = left + 1;
-                if (left >= heap.length) break;
-                const child = right < heap.length && heap[right].score < heap[left].score ? right : left;
-                if (heap[child].score >= last.score) break;
-                heap[index] = heap[child];
-                index = child;
-            }
-            heap[index] = last;
-        }
-        return first;
-    };
-
-    const startId = nodeId(start.column, start.row);
-    const goalId = nodeId(goal.column, goal.row);
-    const costs = new Map([[startId, 0]]);
-    const parents = new Map();
-    const closed = new Set();
-    heapPush({ column: start.column, row: start.row, id: startId, score: heuristic(start.column, start.row) });
-    const directions = [
-        [-1, 0, 1], [1, 0, 1], [0, -1, 1], [0, 1, 1],
-        [-1, -1, Math.SQRT2], [1, -1, Math.SQRT2], [-1, 1, Math.SQRT2], [1, 1, Math.SQRT2]
-    ];
-    let found = false;
-    let visited = 0;
-
-    while (heap.length && visited < 25000) {
-        const current = heapPop();
-        if (closed.has(current.id)) continue;
-        if (current.id === goalId) {
-            found = true;
-            break;
-        }
-        closed.add(current.id);
-        visited += 1;
-
-        for (const [dx, dy, moveCost] of directions) {
-            const column = current.column + dx;
-            const row = current.row + dy;
-            if (column < 0 || row < 0 || column >= columns || row >= rows) continue;
-            const neighborId = nodeId(column, row);
-            if (closed.has(neighborId) || !isWalkable(nodePosition(column, row))) continue;
-            if (dx && dy && (
-                !isWalkable(nodePosition(current.column + dx, current.row)) ||
-                !isWalkable(nodePosition(current.column, current.row + dy))
-            )) continue;
-
-            const nextCost = costs.get(current.id) + moveCost;
-            if (nextCost >= (costs.get(neighborId) ?? Infinity)) continue;
-            costs.set(neighborId, nextCost);
-            parents.set(neighborId, current.id);
-            heapPush({ column, row, id: neighborId, score: nextCost + heuristic(column, row) });
-        }
-    }
-    if (!found) return [];
-
-    const path = [];
-    for (let currentId = goalId; currentId !== startId; currentId = parents.get(currentId)) {
-        const row = Math.floor(currentId / columns);
-        const column = currentId % columns;
-        path.push(nodePosition(column, row));
-    }
-    path.reverse();
-
-    const canTravelDirectly = (from, to) => {
-        const distance = Math.hypot(to.x - from.x, to.y - from.y);
-        const steps = Math.ceil(distance / 8);
-        for (let step = 1; step <= steps; step += 1) {
-            const fraction = step / steps;
-            const position = {
-                x: from.x + (to.x - from.x) * fraction,
-                y: from.y + (to.y - from.y) * fraction
-            };
-            if (!isWalkable(position)) return false;
-        }
-        return true;
-    };
-
-    const exactTarget = { x: targetX, y: targetY };
-    const lastPathPosition = path[path.length - 1] || { x, y };
-    if (isWalkable(exactTarget) && canTravelDirectly(lastPathPosition, exactTarget)) path.push(exactTarget);
-
-    const simplifiedPath = [];
-    let from = { x, y };
-    let index = 0;
-    while (index < path.length) {
-        let furthestVisible = index;
-        for (let candidate = path.length - 1; candidate > index; candidate -= 1) {
-            if (canTravelDirectly(from, path[candidate])) {
-                furthestVisible = candidate;
-                break;
-            }
-        }
-        const waypoint = path[furthestVisible];
-        simplifiedPath.push(waypoint);
-        from = waypoint;
-        index = furthestVisible + 1;
-    }
-    return simplifiedPath;
-}
-
 game.addEventListener("pointerdown", event => {
     if (gamePaused || isCustomizingControls || !window.PlayerProfile?.isProfileReady()) return;
-    const tappedNpc = event.target.closest(".npc-nongdan-nha");
-    const tappedWarehouse = event.target.closest(".storage") || (event.target.closest(".player")
-        ? [...document.querySelectorAll(".storage")].find(storage => {
-            const storageRect = storage.getBoundingClientRect();
-            const playerRect = event.target.closest(".player").getBoundingClientRect();
-            return storageRect.left < playerRect.right && storageRect.right > playerRect.left &&
-                storageRect.top < playerRect.bottom && storageRect.bottom > playerRect.top;
-        })
-        : null);
-    if (!tappedNpc && event.target.closest("button, input, select, textarea, a, [contenteditable='true'], .apple-tree-panel, .inventory-bar, .inventory-content, .target-select-widget, .npc-dialogue")) return;
-    if (!tappedNpc) event.preventDefault();
+    if (event.target.closest("button, input, select, textarea, a, [contenteditable='true'], .selectable-object, .inventory-bar, .target-select-widget")) return;
+    event.preventDefault();
 
     const worldBounds = world.getBoundingClientRect();
     const zoom = Number(window.FarmCameraZoom) || 1;
@@ -304,91 +98,11 @@ game.addEventListener("pointerdown", event => {
     const playerHeight = playerSprite.offsetHeight * 1.5;
     const mapX = (event.clientX - worldBounds.left) / zoom;
     const mapY = (event.clientY - worldBounds.top) / zoom;
-    const collisionWidth = playerWidth * 0.6;
-    const collisionHeight = 12;
-    const collisionXOffset = (playerWidth - collisionWidth) / 2;
-    const collisionYOffset = playerHeight - collisionHeight;
-    const tappedTree = event.target.closest(".apple-tree.selectable-object");
-    let targetX = mapX - playerWidth / 2;
-    let targetY = mapY - playerHeight / 2;
-
-    if (tappedTree) {
-        const treeSprite = tappedTree.querySelector(".apple-tree-sprite");
-        const treeCollisionLeft = tappedTree.offsetLeft + treeSprite.offsetLeft + treeSprite.offsetWidth * 0.39;
-        const treeBottom = tappedTree.offsetTop + treeSprite.offsetTop + treeSprite.offsetHeight;
-        targetX = treeCollisionLeft - collisionXOffset - collisionWidth - 2;
-        targetY = treeBottom - collisionYOffset + 4;
-    } else if (tappedNpc) {
-        targetX = tappedNpc.offsetLeft + tappedNpc.offsetWidth * 0.15 - collisionXOffset - collisionWidth - 2;
-        targetY = tappedNpc.offsetTop + tappedNpc.offsetHeight - playerHeight;
-    } else if (tappedWarehouse) {
-        targetX = tappedWarehouse.offsetLeft + tappedWarehouse.offsetWidth / 2 - playerWidth / 2;
-        targetY = tappedWarehouse.offsetTop + tappedWarehouse.offsetHeight - collisionYOffset + 4;
-    }
-    moveTargetTree = tappedTree;
-    AppleTreeSystem.setTargetTree(tappedTree);
-    moveTargetNpc = tappedNpc;
-    window.FarmerNpcSystem?.setTargetNpc(tappedNpc);
-    moveTargetWarehouse = tappedWarehouse;
 
     moveTarget = {
-        x: Math.max(0, Math.min(world.offsetWidth - playerWidth, targetX)),
-        y: Math.max(0, Math.min(world.offsetHeight - playerHeight, targetY))
+        x: Math.max(0, Math.min(world.offsetWidth - playerWidth, mapX - playerWidth / 2)),
+        y: Math.max(0, Math.min(world.offsetHeight - playerHeight, mapY - playerHeight / 2))
     };
-    if (tappedNpc && window.FarmerNpcSystem?.isPlayerNear(tappedNpc, x, y, playerWidth, playerHeight, collisionXOffset, collisionWidth, collisionYOffset, collisionHeight)) {
-        moveTarget = null;
-        moveTargetNpc = null;
-        movePath = [];
-        destinationMarker.hidden = true;
-        return;
-    }
-    if (tappedTree && AppleTreeSystem.selectTree(tappedTree, x, y, playerWidth, playerHeight)) {
-        moveTarget = null;
-        moveTargetTree = null;
-        moveTargetNpc = null;
-        moveTargetWarehouse = null;
-        movePath = [];
-        destinationMarker.hidden = true;
-        return;
-    }
-
-    if (tappedWarehouse && Math.hypot(targetX - x, targetY - y) <= 24) {
-        moveTarget = null;
-        moveTargetWarehouse = null;
-        movePath = [];
-        destinationMarker.hidden = true;
-        window.WarehouseSystem.open();
-        return;
-    }
-
-    if (tappedTree || tappedNpc || tappedWarehouse) {
-        destinationMarker.hidden = true;
-    } else {
-        destinationMarker.style.left = `${mapX}px`;
-        destinationMarker.style.top = `${mapY}px`;
-        destinationMarker.hidden = false;
-    }
-
-    movePath = planPlayerPath(
-        moveTarget.x,
-        moveTarget.y,
-        playerWidth,
-        playerHeight,
-        collisionWidth,
-        collisionHeight,
-        collisionXOffset,
-        collisionYOffset,
-        FenceCollision.getObstacles(world)
-    );
-    if (!movePath.length) {
-        moveTarget = null;
-        moveTargetTree = null;
-        moveTargetNpc = null;
-        moveTargetWarehouse = null;
-        AppleTreeSystem.setTargetTree(null);
-        window.FarmerNpcSystem?.setTargetNpc(null);
-        destinationMarker.hidden = true;
-    }
 });
 
 const keyboardDirections = {
@@ -404,13 +118,8 @@ const keyboardDirections = {
 
 document.addEventListener("keydown", event => {
     const direction = keyboardDirections[event.key];
-    if (direction && !gamePaused && !window.WarehouseSystem?.isOpen() && window.PlayerProfile?.isProfileReady()) {
+    if (direction && !gamePaused && window.PlayerProfile?.isProfileReady()) {
         moveTarget = null;
-        movePath = [];
-        moveTargetTree = null;
-        moveTargetWarehouse = null;
-        AppleTreeSystem.setTargetTree(null);
-        destinationMarker.hidden = true;
         keys[direction] = true;
         event.preventDefault();
     }
@@ -469,11 +178,11 @@ function applyInventorySize() {
 }
 
 const CAMERA_ZOOM_KEY = "nongtrai2d-camera-zoom";
-const defaultCameraZoom = window.matchMedia("(pointer: coarse)").matches ? 1 : 1.4;
+const defaultCameraZoom = window.matchMedia("(pointer: coarse)").matches ? 1.5 : 1.4;
 let savedCameraZoom = defaultCameraZoom;
 try {
     const storedCameraZoom = Number(localStorage.getItem(CAMERA_ZOOM_KEY));
-    if (Number.isFinite(storedCameraZoom) && storedCameraZoom >= 0.5 && storedCameraZoom <= 1.8) {
+    if (Number.isFinite(storedCameraZoom) && storedCameraZoom >= 0.8 && storedCameraZoom <= 1.8) {
         savedCameraZoom = storedCameraZoom;
     }
 } catch {}
@@ -631,11 +340,6 @@ function setGamePaused(paused) {
     game.classList.toggle("is-paused", paused);
     menuBackdrop.hidden = !paused;
     moveTarget = null;
-    movePath = [];
-    moveTargetTree = null;
-    moveTargetWarehouse = null;
-    window.WarehouseSystem?.close();
-    destinationMarker.hidden = true;
     keys.ArrowUp = keys.ArrowDown = keys.ArrowLeft = keys.ArrowRight = false;
     keys.w = keys.a = keys.s = keys.d = false;
 
@@ -669,28 +373,18 @@ menuBackdrop.addEventListener("click", () => settingsToggle.click());
 
 function update(timestamp) {
     const now = timestamp ?? performance.now();
-    const frameStartX = x;
-    const frameStartY = y;
     const keyboardMovingUp = keys["w"] || keys.ArrowUp;
     const keyboardMovingDown = keys["s"] || keys.ArrowDown;
     const keyboardMovingLeft = keys["a"] || keys.ArrowLeft;
     const keyboardMovingRight = keys["d"] || keys.ArrowRight;
     let targetVector = null;
-    if (!gamePaused && !keyboardMovingUp && !keyboardMovingDown && !keyboardMovingLeft && !keyboardMovingRight && movePath.length) {
-        let deltaX = movePath[0].x - x;
-        let deltaY = movePath[0].y - y;
-        let distance = Math.hypot(deltaX, deltaY);
-        while (distance <= speed && movePath.length) {
-            x = movePath[0].x;
-            y = movePath[0].y;
-            movePath.shift();
-            if (movePath.length) {
-                deltaX = movePath[0].x - x;
-                deltaY = movePath[0].y - y;
-                distance = Math.hypot(deltaX, deltaY);
-            }
-        }
-        if (movePath.length && distance > 0) {
+    if (!gamePaused && !keyboardMovingUp && !keyboardMovingDown && !keyboardMovingLeft && !keyboardMovingRight && moveTarget) {
+        const deltaX = moveTarget.x - x;
+        const deltaY = moveTarget.y - y;
+        const distance = Math.hypot(deltaX, deltaY);
+        if (distance <= 1) {
+            moveTarget = null;
+        } else {
             targetVector = { x: deltaX / distance, y: deltaY / distance, distance };
         }
     }
@@ -724,86 +418,22 @@ function update(timestamp) {
 
         const previousX = x;
         const previousY = y;
-        const obstacles = FenceCollision.getObstacles(world);
-        if (targetVector) {
-            if (FenceCollision.canOccupy(
-                world,
-                nextX + collisionXOffset,
-                nextY + collisionYOffset,
-                collisionWidth,
-                collisionHeight,
-                obstacles
-            )) {
-                x = nextX;
-                y = nextY;
-            } else {
-                movePath = planPlayerPath(
-                    moveTarget.x,
-                    moveTarget.y,
-                    playerWidth,
-                    playerHeight,
-                    collisionWidth,
-                    collisionHeight,
-                    collisionXOffset,
-                    collisionYOffset,
-                    obstacles
-                );
-                if (!movePath.length) moveTarget = null;
-            }
-        } else {
-            if (FenceCollision.canOccupy(
-                world,
-                nextX + collisionXOffset,
-                y + collisionYOffset,
-                collisionWidth,
-                collisionHeight,
-                obstacles
-            )) x = nextX;
-            if (FenceCollision.canOccupy(
-                world,
-                x + collisionXOffset,
-                nextY + collisionYOffset,
-                collisionWidth,
-                collisionHeight,
-                obstacles
-            )) y = nextY;
-        }
-        if (targetVector && x === previousX && y === previousY && movePath.length === 0) moveTarget = null;
+        if (FenceCollision.canOccupy(
+            world,
+            nextX + collisionXOffset,
+            y + collisionYOffset,
+            collisionWidth,
+            collisionHeight
+        )) x = nextX;
+        if (FenceCollision.canOccupy(
+            world,
+            x + collisionXOffset,
+            nextY + collisionYOffset,
+            collisionWidth,
+            collisionHeight
+        )) y = nextY;
+        if (targetVector && x === previousX && y === previousY) moveTarget = null;
     }
-    const playerWidth = playerSprite.offsetWidth * 1.5;
-    const playerHeight = playerSprite.offsetHeight * 1.5;
-    const collisionWidth = playerWidth * 0.6;
-    const collisionHeight = 12;
-    const collisionXOffset = (playerWidth - collisionWidth) / 2;
-    const collisionYOffset = playerHeight - collisionHeight;
-    const npcReached = Boolean(moveTargetNpc && window.FarmerNpcSystem?.isPlayerNear(
-        moveTargetNpc,
-        x,
-        y,
-        playerWidth,
-        playerHeight,
-        collisionXOffset,
-        collisionWidth,
-        collisionYOffset,
-        collisionHeight
-    ));
-    const reachedDestination = hasReachedMoveTarget();
-    if (reachedDestination || (moveTargetTree && AppleTreeSystem.selectTree(
-        moveTargetTree,
-        x,
-        y,
-        playerWidth,
-        playerHeight
-    )) || npcReached) {
-        if (reachedDestination && moveTargetWarehouse) window.WarehouseSystem.open();
-        if (npcReached) window.FarmerNpcSystem.showDialogue();
-        moveTarget = null;
-        movePath = [];
-        moveTargetTree = null;
-        moveTargetNpc = null;
-        moveTargetWarehouse = null;
-    }
-    if (!moveTarget || (x === frameStartX && y === frameStartY)) destinationMarker.hidden = true;
 
     if (isMoving) {
         const activeSpriteFrameCounts = playerSprite.dataset.gender === "female"
@@ -852,8 +482,7 @@ function update(timestamp) {
 
     // CAMERA GAME: camera.js tự đọc kích thước .world và giữ nhân vật ở tâm màn hình.
     FarmCamera.follow(game, world, player, x, y);
-    AppleTreeSystem.refresh(x, y, playerWidth, playerHeight);
-    window.FarmerNpcSystem?.refresh(x, y, playerWidth, playerHeight);
+    AppleTreeSystem.refresh(x, y, player.offsetWidth * 1.5, player.offsetHeight * 1.5);
     requestAnimationFrame(update);
 }
 

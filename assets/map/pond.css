@@ -1,0 +1,463 @@
+.pond-water {
+    position: absolute;
+    z-index: 1;
+    width: 344px;
+    height: 176px;
+    pointer-events: none;
+}
+
+.pond-sign {
+    position: absolute;
+    z-index: 1;
+    width: 64px;
+    height: 78px;
+    pointer-events: none;
+}
+
+.pond-sign-post {
+    position: absolute;
+    bottom: 0;
+    left: 28px;
+    width: 9px;
+    height: 41px;
+    background:
+        linear-gradient(90deg, #704522 0 22%, #b77a3d 22% 67%, #87552e 67%);
+    box-shadow: 2px 2px 0 #4e3925;
+}
+
+.pond-sign-board {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 37px;
+    box-sizing: border-box;
+    border: 3px solid #57371e;
+    background:
+        linear-gradient(90deg, transparent 0 8%, rgba(255, 223, 152, .23) 8% 12%, transparent 12% 88%, rgba(92, 55, 29, .2) 88% 92%, transparent 92%),
+        #bd8547;
+    box-shadow:
+        inset 0 0 0 2px #dca65e,
+        2px 3px 0 #4e3925;
+    color: #fff0c2;
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1;
+    text-shadow: 1px 1px 0 #674221;
+    white-space: nowrap;
+}
+
+.pond-bank {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(
+        22% 8%, 27% 8%, 27% 4%, 37% 4%, 37% 0%, 47% 0%, 47% 4%,
+        55% 4%, 55% 0%, 65% 0%, 65% 4%, 78% 4%, 78% 8%, 86% 8%,
+        86% 12%, 92% 12%, 92% 20%, 96% 20%, 96% 28%, 100% 28%,
+        100% 48%, 96% 48%, 96% 60%, 92% 60%, 92% 72%, 86% 72%,
+        86% 80%, 78% 80%, 78% 88%, 66% 88%, 66% 96%, 45% 96%,
+        45% 100%, 28% 100%, 28% 96%, 20% 96%, 20% 92%, 12% 92%,
+        12% 84%, 8% 84%, 8% 76%, 4% 76%, 4% 68%, 0 68%, 0 42%,
+        4% 42%, 4% 32%, 8% 32%, 8% 24%, 12% 24%, 12% 20%,
+        16% 20%, 16% 12%, 22% 12%
+    );
+}
+
+.pond-bank {
+    background-image: url("./grass.png");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+}
+
+.pond-sand {
+    position: absolute;
+    inset: 9px 11px 11px;
+    clip-path: polygon(
+        23% 8%, 30% 8%, 30% 4%, 41% 4%, 41% 0%, 51% 0%, 51% 4%,
+        61% 4%, 61% 0%, 72% 0%, 72% 4%, 83% 4%, 83% 8%, 89% 8%,
+        89% 16%, 94% 16%, 94% 28%, 98% 28%, 98% 47%, 94% 47%,
+        94% 61%, 89% 61%, 89% 72%, 82% 72%, 82% 80%, 71% 80%,
+        71% 88%, 59% 88%, 59% 94%, 42% 94%, 42% 98%, 28% 98%,
+        28% 94%, 19% 94%, 19% 89%, 12% 89%, 12% 80%, 7% 80%,
+        7% 70%, 3% 70%, 3% 61%, 0 61%, 0 42%, 4% 42%, 4% 31%,
+        8% 31%, 8% 22%, 13% 22%, 13% 15%, 18% 15%, 18% 10%, 23% 10%
+    );
+    background:
+        linear-gradient(0deg, transparent 0 15%, rgba(121, 93, 53, .16) 15% 20%, transparent 20% 100%),
+        linear-gradient(90deg, transparent 0 24%, rgba(246, 220, 158, .52) 24% 27%, transparent 27% 62%, rgba(145, 111, 61, .18) 62% 66%, transparent 66%),
+        repeating-linear-gradient(0deg, rgba(255, 232, 174, .12) 0 3px, transparent 3px 8px),
+        #c8aa6c;
+}
+
+.pond-sand-grain {
+    position: absolute;
+    z-index: 1;
+    height: 3px;
+    background: #e2c785;
+    box-shadow: 3px 2px 0 #ad8b55;
+}
+
+.pond-sand-grain--one {
+    top: 17%;
+    left: 38%;
+    width: 10px;
+}
+
+.pond-sand-grain--two {
+    top: 21%;
+    left: 69%;
+    width: 7px;
+    background: #a98750;
+    box-shadow: 3px -2px 0 #e0c17b;
+}
+
+.pond-sand-grain--three {
+    top: 47%;
+    left: 7%;
+    width: 8px;
+}
+
+.pond-sand-grain--four {
+    top: 72%;
+    left: 19%;
+    width: 6px;
+    background: #aa8852;
+    box-shadow: 3px -2px 0 #e2c785;
+}
+
+.pond-sand-grain--five {
+    top: 73%;
+    left: 72%;
+    width: 9px;
+}
+
+.pond-sand-grain--six {
+    top: 48%;
+    right: 7%;
+    width: 7px;
+    background: #aa8852;
+    box-shadow: -3px -2px 0 #e2c785;
+}
+
+.pond-surface {
+    position: absolute;
+    inset: 19px 22px 20px;
+    clip-path: polygon(
+        23% 8%, 30% 8%, 30% 4%, 41% 4%, 41% 0%, 51% 0%, 51% 4%,
+        61% 4%, 61% 0%, 72% 0%, 72% 4%, 83% 4%, 83% 8%, 89% 8%,
+        89% 16%, 94% 16%, 94% 28%, 98% 28%, 98% 47%, 94% 47%,
+        94% 61%, 89% 61%, 89% 72%, 82% 72%, 82% 80%, 71% 80%,
+        71% 88%, 59% 88%, 59% 94%, 42% 94%, 42% 98%, 28% 98%,
+        28% 94%, 19% 94%, 19% 89%, 12% 89%, 12% 80%, 7% 80%,
+        7% 70%, 3% 70%, 3% 61%, 0 61%, 0 42%, 4% 42%, 4% 31%,
+        8% 31%, 8% 22%, 13% 22%, 13% 15%, 18% 15%, 18% 10%, 23% 10%
+    );
+    background:
+        linear-gradient(0deg, transparent 0 38%, rgba(225, 255, 241, .13) 38% 40%, transparent 40% 100%),
+        #9cebd6;
+    overflow: hidden;
+}
+
+.pond-wind {
+    position: absolute;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(227, 255, 244, .78);
+    opacity: 0;
+    animation: pond-breeze 3.8s ease-in-out infinite;
+}
+
+.pond-wind--one {
+    top: 28%;
+    left: 20%;
+    width: 46px;
+}
+
+.pond-wind--two {
+    top: 63%;
+    left: 54%;
+    width: 36px;
+    animation-delay: -1.9s;
+}
+
+.pond-bubble {
+    position: absolute;
+    bottom: 20%;
+    width: 6px;
+    height: 6px;
+    border: 2px solid rgba(235, 255, 246, .82);
+    border-radius: 50%;
+    opacity: 0;
+    animation: pond-bubble-rise 3.2s ease-out infinite;
+}
+
+.pond-bubble--one {
+    left: 39%;
+}
+
+.pond-bubble--two {
+    left: 66%;
+    width: 4px;
+    height: 4px;
+    animation-delay: -1.6s;
+}
+
+.pond-bubble--three {
+    left: 52%;
+    width: 3px;
+    height: 3px;
+    animation-delay: -2.5s;
+}
+
+.pond-fish {
+    position: absolute;
+    width: 22px;
+    height: 8px;
+    border-radius: 55% 48% 48% 55%;
+    background: #518b7d;
+    opacity: .62;
+    box-shadow: inset 0 2px 0 rgba(218, 255, 237, .55);
+    animation: pond-fish-swim 5s ease-in-out infinite alternate;
+}
+
+.pond-fish::before {
+    content: "";
+    position: absolute;
+    top: 1px;
+    right: -6px;
+    width: 7px;
+    height: 6px;
+    background: #518b7d;
+    clip-path: polygon(0 50%, 100% 0, 100% 100%);
+}
+
+.pond-fish::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: #e7fff5;
+}
+
+.pond-fish--one {
+    top: 43%;
+    left: 31%;
+}
+
+.pond-fish--two {
+    top: 65%;
+    left: 65%;
+    transform: scale(.72);
+    animation-delay: -2.3s;
+}
+
+.pond-fish--three {
+    top: 52%;
+    left: 48%;
+    width: 30px;
+    height: 11px;
+    background: #bb8950;
+    opacity: .72;
+    box-shadow: inset 0 2px 0 rgba(255, 232, 183, .72);
+    animation-duration: 6s;
+    animation-delay: -1.2s;
+}
+
+.pond-fish--three::before {
+    top: 2px;
+    right: -7px;
+    width: 8px;
+    height: 7px;
+    background: #bb8950;
+}
+
+.pond-fish--three::after {
+    top: 3px;
+    left: 7px;
+    background: #fff1ca;
+}
+
+.pond-fish--four {
+    top: 31%;
+    left: 54%;
+    width: 26px;
+    height: 9px;
+    background: #718c60;
+    opacity: .68;
+    box-shadow: inset 0 2px 0 rgba(221, 245, 194, .7);
+    animation-duration: 5.5s;
+    animation-delay: -3s;
+}
+
+.pond-fish--four::before {
+    top: 1px;
+    right: -6px;
+    width: 7px;
+    height: 6px;
+    background: #718c60;
+}
+
+.pond-fish--four::after {
+    top: 2px;
+    left: 6px;
+    background: #efffda;
+}
+
+.pond-ripple {
+    position: absolute;
+    width: 10px;
+    height: 4px;
+    border: 1px solid rgba(232, 255, 246, .82);
+    border-radius: 50%;
+    opacity: 0;
+    animation: pond-fish-ripple 2.8s ease-out infinite;
+}
+
+.pond-ripple--one {
+    top: 42%;
+    left: 38%;
+}
+
+.pond-ripple--two {
+    top: 65%;
+    left: 70%;
+    animation-delay: 1.4s;
+}
+
+.pond-plant {
+    position: absolute;
+    z-index: 1;
+    width: 12px;
+    height: 17px;
+    border-left: 4px solid #597c50;
+    transform: rotate(8deg);
+}
+
+.pond-plant::before,
+.pond-plant::after {
+    content: "";
+    position: absolute;
+    width: 7px;
+    height: 4px;
+    background: #597c50;
+}
+
+.pond-plant::before {
+    top: 5px;
+    left: -8px;
+    transform: rotate(-18deg);
+}
+
+.pond-plant::after {
+    top: 1px;
+    left: 0;
+    transform: rotate(25deg);
+}
+
+.pond-plant--left {
+    top: 71%;
+    left: 48%;
+}
+
+.pond-plant--right {
+    top: 48%;
+    right: 19%;
+    transform: rotate(-8deg);
+}
+
+.pond-grass {
+    position: absolute;
+    z-index: 2;
+    width: 22px;
+    height: 18px;
+    background:
+        linear-gradient(#82c85a 0 0) 3px 5px / 4px 4px no-repeat,
+        linear-gradient(#558e43 0 0) 3px 9px / 4px 7px no-repeat,
+        linear-gradient(#a0d968 0 0) 9px 1px / 4px 4px no-repeat,
+        linear-gradient(#659f48 0 0) 9px 5px / 4px 11px no-repeat,
+        linear-gradient(#78bc50 0 0) 15px 7px / 4px 4px no-repeat,
+        linear-gradient(#4e8840 0 0) 15px 11px / 4px 5px no-repeat,
+        linear-gradient(#477d3e 0 0) 0 15px / 22px 3px no-repeat;
+    filter: drop-shadow(1px 1px 0 #315e37);
+}
+
+.pond-grass--one {
+    top: 0;
+    left: 18%;
+}
+
+.pond-grass--two {
+    top: 0;
+    left: 46%;
+}
+
+.pond-grass--three {
+    top: 0;
+    left: 72%;
+}
+
+.pond-grass--four {
+    top: 38%;
+    left: 0;
+}
+
+.pond-grass--five {
+    top: 62%;
+    left: 0;
+}
+
+.pond-grass--six {
+    top: 36%;
+    right: -7px;
+}
+
+.pond-grass--eight {
+    bottom: 0;
+    left: 40%;
+}
+
+.pond-grass--nine {
+    bottom: 0;
+    left: 69%;
+    transform: scale(.7);
+}
+
+@keyframes pond-fish-swim {
+    from { margin-left: -10px; }
+    to { margin-left: 13px; }
+}
+
+@keyframes pond-fish-ripple {
+    0% { opacity: .65; transform: scale(.45); }
+    70%, 100% { opacity: 0; transform: scale(2.2); }
+}
+
+@keyframes pond-bubble-rise {
+    0% { opacity: 0; transform: translateY(8px) scale(.65); }
+    20% { opacity: .8; }
+    80% { opacity: .55; }
+    100% { opacity: 0; transform: translateY(-38px) scale(1.1); }
+}
+
+@keyframes pond-breeze {
+    0%, 100% { opacity: 0; transform: translateX(-12px) scaleX(.65); }
+    28%, 68% { opacity: .72; }
+    50% { opacity: .45; transform: translateX(16px) scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pond-fish,
+    .pond-ripple,
+    .pond-bubble,
+    .pond-wind {
+        animation: none;
+    }
+}

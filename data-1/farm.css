@@ -71,6 +71,21 @@
     text-align: center;
 }
 
+.apple-tree.is-selected::after {
+    content: "▼";
+    position: absolute;
+    z-index: 5;
+    top: -34px;
+    left: 50%;
+    color: #ffe46b;
+    font-size: 28px;
+    line-height: 1;
+    -webkit-text-stroke: 1px #65451f;
+    text-shadow: 0 2px 0 #50361d, 0 3px 5px rgba(28, 34, 25, 0.6), 0 0 8px rgba(255, 227, 101, 0.65);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
 /* HÀNG CÂY TÁO: cây tương tác từ cây chính sang trái, cách nhau 350px và tránh khu nhà kho bên phải. */
 .orchard-tree {
     pointer-events: auto;

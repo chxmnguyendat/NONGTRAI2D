@@ -45,6 +45,7 @@
             genderOptions[0].focus();
             return;
         }
+        window.dispatchEvent(new Event("farmgame:begin"));
         window.SceneTransitions.fade(() => {
             window.GameSave?.update("profile", { name, gender: selectedGender });
             [playerSprite, nameAvatar].forEach(element => {

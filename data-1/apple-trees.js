@@ -23,6 +23,7 @@ const GROW_DURATION_SECONDS = 12;
 
 let selectedTree = null;
 let nearbyTree = null;
+let targetTree = null;
 let playerBounds = { x: 0, y: 0, width: 0, height: 0 };
 let apples = 0;
 let isPaused = false;
@@ -85,7 +86,10 @@ function isPlayerNearTree(tree) {
 
 function refreshSelection() {
     nearbyTree = appleTrees.find(tree => isPlayerNearTree(tree.element)) || null;
-    appleTrees.forEach(tree => tree.element.classList.toggle("is-nearby", tree === nearbyTree));
+    appleTrees.forEach(tree => {
+        tree.element.classList.toggle("is-nearby", tree === nearbyTree);
+        tree.element.classList.toggle("is-selected", tree === selectedTree || tree === targetTree);
+    });
 
     // Khi rời khỏi cây đang chọn, đóng bảng để lần quay lại phải chọn lại.
     if (selectedTree && !isPlayerNearTree(selectedTree.element)) {
@@ -113,6 +117,21 @@ function toggleSelection() {
         selectedTree.panel.hidden = false;
     }
     refreshSelection();
+}
+
+function selectTreeByElement(element, x, y, width, height) {
+    const tree = appleTrees.find(candidate => candidate.element === element);
+    if (!tree || isPaused) return false;
+
+    playerBounds = { x, y, width, height };
+    if (!isPlayerNearTree(tree.element)) return false;
+
+    if (selectedTree && selectedTree !== tree) selectedTree.panel.hidden = true;
+    selectedTree = tree;
+    targetTree = null;
+    tree.panel.hidden = false;
+    refreshSelection();
+    return true;
 }
 
 function startGrowthTimer(tree) {
@@ -242,6 +261,15 @@ window.AppleTreeSystem = {
     refresh(x, y, width, height) {
         playerBounds = { x, y, width, height };
         refreshSelection();
+    },
+    selectTree(element, x, y, width, height) {
+        return selectTreeByElement(element, x, y, width, height);
+    },
+    setTargetTree(element) {
+        targetTree = appleTrees.find(tree => tree.element === element) || null;
+        appleTrees.forEach(tree => {
+            tree.element.classList.toggle("is-selected", tree === selectedTree || tree === targetTree);
+        });
     },
     setPaused(paused) {
         isPaused = paused;

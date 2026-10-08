@@ -6,8 +6,11 @@
     <title>Farming Pixel v1.0</title>
     <link rel="stylesheet" href="data/style.css">
     <link rel="stylesheet" href="data-1/storage.css">
+    <link rel="stylesheet" href="data-1/warehouse.css">
     <link rel="stylesheet" href="data-1/farm.css">
     <link rel="stylesheet" href="data-1/fence.css">
+    <link rel="stylesheet" href="assets/map/npc-nongdan-nha/npc-nongdan-nha.css">
+    <link rel="stylesheet" href="assets/map/pond.css">
     <link rel="stylesheet" href="data-1/effects.css">
     <link rel="stylesheet" href="effectplayer/player-effects.css">
     <link rel="stylesheet" href="hotbar-pixel/inventory.css">
@@ -82,6 +85,7 @@
         <div class="path path-branch-1" aria-hidden="true"></div>
         <div class="storage" role="img" aria-label="Nhà kho nông sản">
             <img src="assets/map/storage-shed.png" alt="">
+            <span class="storage-nameplate" aria-hidden="true">Nhà Kho</span>
         </div>
         <!-- CÂY TÁO: sprite sheet, trạng thái tưới/chín và nút thu hoạch; sửa giao diện tại farm.css, logic tại script.js -->
         <section class="apple-tree selectable-object" data-stage="waiting" aria-label="Cây táo">
@@ -152,6 +156,10 @@
             <div class="soil-row"><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span><span class="crop"></span></div>
         </section>
 
+        <div class="destination-marker" id="destination-marker" aria-hidden="true" hidden>
+            <img src="assets/ui/finish-go-pixel.png" alt="">
+        </div>
+
         <div class="player">
             <div class="landing-wind" id="landing-wind" aria-hidden="true">
                 <span class="wind-streak wind-streak-left"></span>
@@ -165,18 +173,42 @@
 
         </div>
 
-        <!-- ĐIỀU KHIỂN NHÂN VẬT: cụm D-pad dùng nút và mũi tên mặc định của game. -->
-        <div class="controls" aria-label="Điều khiển nhân vật">
-            <button class="control up" data-direction="up" aria-label="Đi lên">&#9650;</button>
-            <button class="control left" data-direction="left" aria-label="Đi sang trái">&#9664;</button>
-            <div class="control-center" aria-hidden="true"></div>
-            <button class="control down" data-direction="down" aria-label="Đi xuống">&#9660;</button>
-            <button class="control right" data-direction="right" aria-label="Đi sang phải">&#9654;</button>
-        </div>
+        <section class="npc-dialogue" id="npc-dialogue" aria-label="Lời thoại nông dân" aria-live="polite" hidden>
+            <h2 class="npc-dialogue-name">Nông dân</h2>
+            <p class="npc-dialogue-text" id="npc-dialogue-text"></p>
+            <button class="npc-dialogue-dismiss" id="npc-dialogue-dismiss" type="button" aria-label="Đóng hộp thoại"></button>
+        </section>
 
         <section class="inventory-bar" aria-label="Túi vật phẩm" aria-live="polite">
-            <output class="inventory-capacity" aria-label="Tổng số vật phẩm">0/100</output>
+            <button class="inventory-toggle" id="inventory-toggle" type="button" aria-expanded="false" aria-controls="inventory-content" aria-label="Mở túi đồ">
+                <img src="assets/ui/balo-icon.png" alt="" aria-hidden="true">
+            </button>
+        </section>
+        <div class="inventory-content" id="inventory-content" aria-label="Nội dung túi đồ" hidden>
+            <div class="inventory-capacity-row">
+                <span class="inventory-title">Túi Đồ</span>
+                <output class="inventory-capacity" aria-label="Tổng số vật phẩm">0/100</output>
+                <button class="inventory-close" id="inventory-close" type="button" aria-label="Thoát khỏi túi đồ">&times;</button>
+            </div>
             <div class="inventory-slots"></div>
+        </div>
+        <section class="inventory-content warehouse-content" id="warehouse-content" aria-label="Nhà kho" aria-modal="true" role="dialog" hidden>
+            <div class="inventory-capacity-row">
+                <span class="inventory-title">Nhà Kho</span>
+                <output class="warehouse-capacity" aria-label="Vật phẩm trong nhà kho">0/300</output>
+                <button class="inventory-close warehouse-close" id="warehouse-close" type="button" aria-label="Đóng nhà kho">&times;</button>
+            </div>
+            <p class="warehouse-hint" id="warehouse-hint" aria-live="polite">Chọn vật phẩm để cất hoặc lấy.</p>
+            <div class="warehouse-panels">
+                <section class="warehouse-section" aria-labelledby="warehouse-inventory-title">
+                    <h3 id="warehouse-inventory-title">Túi Đồ</h3>
+                    <div class="warehouse-inventory-slots inventory-slots" role="list"></div>
+                </section>
+                <section class="warehouse-section" aria-labelledby="warehouse-storage-title">
+                    <h3 id="warehouse-storage-title">Nhà Kho</h3>
+                    <div class="warehouse-storage-slots inventory-slots" role="list"></div>
+                </section>
+            </div>
         </section>
 
         <!-- NÚT CHỌN MỤC TIÊU: chỉ chọn/bỏ chọn cây trong phạm vi gần, không thực hiện hành động chăm sóc. -->
@@ -222,8 +254,6 @@
                 </div>
                 <div class="settings-group">
                     <h4>Điều khiển</h4>
-                    <label for="controls-size">K&#237;ch th&#432;&#7899;c n&#250;t: <output id="controls-size-value">100%</output></label>
-                    <input id="controls-size" type="range" min="60" max="150" step="5" value="100">
                     <label for="inventory-size">Kích thước túi đồ: <output id="inventory-size-value">100%</output></label>
                     <input id="inventory-size" type="range" min="60" max="150" step="5" value="100">
                     <!-- TÙY BIẾN NÚT: bật chế độ kéo cụm điều khiển và nút Chọn tới vị trí mong muốn. -->
@@ -231,8 +261,14 @@
                 </div>
                 <div class="settings-group">
                     <h4>Camera</h4>
-                    <label for="camera-zoom">Thu phóng: <output id="camera-zoom-value">140%</output></label>
-                    <input id="camera-zoom" type="range" min="80" max="180" step="5" value="140">
+                    <label for="camera-zoom">Thu phóng (nhỏ hơn để thấy rộng hơn): <output id="camera-zoom-value">140%</output></label>
+                    <input id="camera-zoom" type="range" min="50" max="180" step="5" value="140">
+                </div>
+                <div class="settings-group">
+                    <h4>Âm thanh</h4>
+                    <label for="music-volume">Âm lượng nhạc: <output id="music-volume-value">40%</output></label>
+                    <input id="music-volume" type="range" min="0" max="100" step="1" value="40">
+                    <button class="customize-controls-button" id="music-toggle" type="button" aria-pressed="false">Bật nhạc nền</button>
                 </div>
             </div>
         </section>
@@ -257,7 +293,9 @@
         </aside>
         <div class="scene-fade is-active" id="scene-fade" aria-hidden="true"></div>
     </div>
-
+    <audio id="background-music" loop preload="auto" aria-hidden="true">
+        <source src="assets/audio/background-music/farm-loop.wav" type="audio/wav">
+    </audio>
     <!-- CAMERA GAME: nạp bộ điều khiển camera trước script chính. -->
     <script src="assets/camera-player/zoom.js"></script>
     <script src="assets/camera-player/camera.js"></script>
@@ -268,8 +306,12 @@
     <script src="data-1/apple-trees.js"></script>
     <script src="data-1/fence.js"></script>
     <script src="hotbar-pixel/inventory.js"></script>
+    <script src="data-1/warehouse.js"></script>
     <script src="hotbar-pixel/player-status.js"></script>
+    <script src="assets/audio/background-music/music.js"></script>
     <script src="data/script.js"></script>
+    <script src="assets/map/npc-nongdan-nha/npc-nongdan-nha.js"></script>
+    <script src="assets/map/pond.js"></script>
     <script src="save/game-backups.js"></script>
 
 </body>

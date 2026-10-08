@@ -1,0 +1,174 @@
+.npc-nongdan-nha {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    width: 75px;
+    height: 121.875px;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.npc-nongdan-nha.is-selected::after {
+    content: "▼";
+    position: absolute;
+    z-index: 5;
+    top: -58px;
+    left: 50%;
+    color: #ffe46b;
+    font-size: 28px;
+    line-height: 1;
+    -webkit-text-stroke: 1px #65451f;
+    text-shadow: 0 2px 0 #50361d, 0 3px 5px rgba(28, 34, 25, 0.6), 0 0 8px rgba(255, 227, 101, 0.65);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.npc-nongdan-nha-nameplate {
+    position: absolute;
+    top: -27px;
+    left: 50%;
+    z-index: 4;
+    padding: 3px 9px 4px;
+    border: 2px solid #573820;
+    border-radius: 7px;
+    background: linear-gradient(#a96e36, #75451f);
+    color: #fff1d0;
+    font: 700 12px/1.2 system-ui, sans-serif;
+    white-space: nowrap;
+    text-shadow: 1px 1px #4b2d18;
+    box-shadow: inset 0 1px #e9b66b, 0 2px 0 #49301c, 0 3px 5px #1b281d66;
+    transform: translateX(-50%);
+    animation: npc-nongdan-nha-nameplate-bob 1.6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes npc-nongdan-nha-nameplate-bob {
+    0%, 100% { margin-top: 0; }
+    50% { margin-top: -2px; }
+}
+
+.npc-nongdan-nha-sprite {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: url("./npc-nongdan-nha.png");
+    background-size: 609.5px 439.5px;
+    background-position: 0 -101.6px;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    animation: npc-nongdan-nha-idle 1.6s steps(1, end) infinite;
+}
+
+.npc-nongdan-nha.is-nearby .npc-nongdan-nha-sprite {
+    filter: drop-shadow(0 0 8px #fff1a8);
+}
+
+@keyframes npc-nongdan-nha-idle {
+    0% { background-position: 0 -101.6px; }
+    12.5% { background-position: -75px -101.6px; }
+    25% { background-position: -150px -101.6px; }
+    37.5% { background-position: -225px -101.6px; }
+    50% { background-position: -300px -101.6px; }
+    62.5% { background-position: -375px -101.6px; }
+    75% { background-position: -450px -101.6px; }
+    87.5% { background-position: -525px -101.6px; }
+    100% { background-position: 0 -101.6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .npc-nongdan-nha-sprite,
+    .npc-nongdan-nha-nameplate {
+        animation: none;
+    }
+}
+
+.npc-dialogue {
+    position: absolute;
+    z-index: 8;
+    right: 2.5%;
+    bottom: 18px;
+    left: 2.5%;
+    box-sizing: border-box;
+    min-height: 132px;
+    padding: 34px 48px 32px;
+    border: 5px solid #79502b;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #fff2d8, #f0d2a5);
+    color: #4d321e;
+    box-shadow: inset 0 0 0 3px #c28a4d, 0 4px 0 #50371f, 0 8px 18px #25331c66;
+}
+
+.npc-dialogue[hidden] {
+    display: none;
+}
+
+.npc-dialogue-name {
+    position: absolute;
+    top: -25px;
+    left: 18px;
+    min-width: 130px;
+    margin: 0;
+    padding: 8px 18px;
+    border: 3px solid #79502b;
+    border-radius: 16px;
+    background: linear-gradient(#9b6331, #70421f);
+    color: #fff0d5;
+    font-size: 19px;
+    line-height: 1.2;
+    text-align: center;
+    text-shadow: 1px 2px #472a17;
+    box-shadow: 0 3px 0 #50371f;
+}
+
+.npc-dialogue-text {
+    margin: 0;
+    font-size: clamp(16px, 2.2vw, 24px);
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.npc-dialogue-dismiss {
+    position: absolute;
+    right: 24px;
+    bottom: 14px;
+    width: 0;
+    height: 0;
+    padding: 0;
+    border: 12px solid transparent;
+    border-top: 16px solid #5a3a1f;
+    background: transparent;
+    cursor: pointer;
+    animation: npc-dialogue-prompt 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes npc-dialogue-prompt {
+        to { transform: translateY(3px); }
+}
+
+@media (max-width: 600px) {
+        .npc-dialogue {
+            right: 12px;
+            bottom: 12px;
+            left: 12px;
+            min-height: 110px;
+            padding: 30px 24px 28px;
+            border-width: 4px;
+        }
+
+        .npc-dialogue-name {
+            left: 12px;
+            min-width: 104px;
+            font-size: 16px;
+        }
+
+        .npc-dialogue-dismiss {
+            right: 16px;
+            bottom: 9px;
+            border-right-width: 10px;
+            border-left-width: 10px;
+            border-top-width: 13px;
+        }
+}

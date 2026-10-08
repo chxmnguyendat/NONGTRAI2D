@@ -3,8 +3,11 @@
     const SLOT_COUNT = 5;
     const MAX_STACK = 20;
     const inventoryElement = document.querySelector(".inventory-bar");
-    const slotsElement = inventoryElement.querySelector(".inventory-slots");
-    const capacityElement = inventoryElement.querySelector(".inventory-capacity");
+    const slotsElement = document.querySelector(".inventory-slots");
+    const capacityElement = document.querySelector(".inventory-capacity");
+    const inventoryToggle = inventoryElement.querySelector(".inventory-toggle");
+    const inventoryContent = document.querySelector(".inventory-content");
+    const inventoryClose = inventoryContent.querySelector(".inventory-close");
     const items = Array(SLOT_COUNT).fill(null);
     const savedItems = window.GameSave?.read().inventory;
     if (Array.isArray(savedItems)) {
@@ -20,6 +23,32 @@
             };
         });
     }
+
+    function setInventoryOpen(isOpen) {
+        inventoryContent.hidden = !isOpen;
+        inventoryToggle.setAttribute("aria-expanded", String(isOpen));
+        inventoryToggle.setAttribute("aria-label", isOpen ? "Đóng túi đồ" : "Mở túi đồ");
+    }
+
+    inventoryToggle.addEventListener("click", () => {
+        setInventoryOpen(inventoryContent.hidden);
+    });
+
+    inventoryClose.addEventListener("click", () => {
+        setInventoryOpen(false);
+    });
+
+    document.addEventListener("pointerdown", event => {
+        if (!inventoryContent.hidden && !inventoryContent.contains(event.target) && !inventoryToggle.contains(event.target)) {
+            setInventoryOpen(false);
+        }
+    });
+
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !inventoryContent.hidden) setInventoryOpen(false);
+    });
+
+    setInventoryOpen(false);
 
     function saveInventory() {
         window.GameSave?.update("inventory", getItems());
@@ -116,6 +145,21 @@
         return requested - remaining;
     }
 
+    function removeFromSlot(index, count = Infinity) {
+        if (!Number.isInteger(index) || index < 0 || index >= items.length) return null;
+        const item = items[index];
+        if (!item) return null;
+
+        const removed = Math.min(item.count, Math.max(0, Math.floor(count)));
+        if (removed === 0) return null;
+        const result = { ...item, count: removed };
+        item.count -= removed;
+        if (item.count === 0) items[index] = null;
+        render();
+        saveInventory();
+        return result;
+    }
+
     render();
-    window.Inventory = Object.freeze({ addItem, getItems, removeItem, slotCount: SLOT_COUNT, maxStack: MAX_STACK });
+    window.Inventory = Object.freeze({ addItem, getItems, removeItem, removeFromSlot, slotCount: SLOT_COUNT, maxStack: MAX_STACK });
 })();
